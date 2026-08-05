@@ -9,6 +9,9 @@
  * Author:            Seth Daniel Design
  * License:           GPL-2.0-or-later
  * Text Domain:       bandit-locations-map
+ * Update URI:        https://github.com/sethdaniel-design/Wayfinder-Map
+ * GitHub Plugin URI: sethdaniel-design/Wayfinder-Map
+ * Primary Branch:    main
  */
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
