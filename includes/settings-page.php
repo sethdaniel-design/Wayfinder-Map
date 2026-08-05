@@ -133,20 +133,67 @@ function bandit_lm_render_settings_page() {
 			</p>
 
 			<h3 style="margin-bottom:0;"><?php esc_html_e( 'Colors', 'bandit-locations-map' ); ?></h3>
-			<table class="form-table">
-				<?php foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) :
-					$ac_val = isset( $s[ $ac_key ] ) ? $s[ $ac_key ] : '';
-				?>
-				<tr>
-					<th><label for="<?php echo esc_attr( $ac_key ); ?>"><?php echo esc_html( $ac_info['label'] ); ?></label></th>
-					<td>
-						<input type="text" id="<?php echo esc_attr( $ac_key ); ?>" name="bandit_lm_settings[<?php echo esc_attr( $ac_key ); ?>]" value="<?php echo esc_attr( $ac_val ); ?>" placeholder="<?php esc_attr_e( 'Inherit', 'bandit-locations-map' ); ?>" class="regular-text" style="max-width:130px;" />
-						<input type="color" value="<?php echo esc_attr( $ac_val ? $ac_val : '#cccccc' ); ?>" onchange="document.getElementById('<?php echo esc_js( $ac_key ); ?>').value=this.value" style="vertical-align:middle;margin-left:8px;" />
-						<?php if ( $ac_info['desc'] ) : ?><p class="description"><?php echo esc_html( $ac_info['desc'] ); ?></p><?php endif; ?>
-					</td>
-				</tr>
-				<?php endforeach; ?>
-			</table>
+			<?php
+			// Build the live-preview inline style from saved overrides, and group the controls.
+			$ap_preview_style = '';
+			$ap_groups        = array();
+			foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {
+				$ap_groups[ $ac_info['group'] ][ $ac_key ] = $ac_info;
+				$ac_val = isset( $s[ $ac_key ] ) ? trim( (string) $s[ $ac_key ] ) : '';
+				if ( $ac_val !== '' ) { $ap_preview_style .= $ac_info['var'] . ':' . $ac_val . ';'; }
+			}
+			?>
+			<div class="blm-ap-wrap">
+				<div class="blm-ap-controls">
+					<?php foreach ( $ap_groups as $ap_group_name => $ap_group_items ) : ?>
+						<h4 class="blm-ap-group"><?php echo esc_html( $ap_group_name ); ?></h4>
+						<table class="form-table blm-ap-table">
+							<?php foreach ( $ap_group_items as $ac_key => $ac_info ) :
+								$ac_val = isset( $s[ $ac_key ] ) ? $s[ $ac_key ] : '';
+							?>
+							<tr>
+								<th>
+									<label for="<?php echo esc_attr( $ac_key ); ?>"><?php echo esc_html( $ac_info['label'] ); ?></label>
+									<?php if ( $ac_info['desc'] ) : ?><span class="blm-ap-desc"><?php echo esc_html( $ac_info['desc'] ); ?></span><?php endif; ?>
+								</th>
+								<td>
+									<input type="text" id="<?php echo esc_attr( $ac_key ); ?>" class="blm-color-field" data-cssvar="<?php echo esc_attr( $ac_info['var'] ); ?>" name="bandit_lm_settings[<?php echo esc_attr( $ac_key ); ?>]" value="<?php echo esc_attr( $ac_val ); ?>" placeholder="<?php esc_attr_e( 'Inherit', 'bandit-locations-map' ); ?>" />
+								</td>
+							</tr>
+							<?php endforeach; ?>
+						</table>
+					<?php endforeach; ?>
+				</div>
+
+				<div class="blm-ap-preview-col">
+					<div class="blm-ap-preview-label"><?php esc_html_e( 'Live preview', 'bandit-locations-map' ); ?></div>
+					<div class="blm-ap-preview" id="blm-ap-preview" style="<?php echo esc_attr( $ap_preview_style ); ?>">
+						<div class="blm-ap-map">
+							<span class="blm-ap-chip"><?php esc_html_e( 'All', 'bandit-locations-map' ); ?></span>
+							<span class="blm-ap-pin" style="left:24%;top:46%;"></span>
+							<span class="blm-ap-pin" style="left:52%;top:66%;"></span>
+							<span class="blm-ap-pin blm-ap-pin--active" style="left:68%;top:30%;"></span>
+						</div>
+						<div class="blm-ap-drawer">
+							<div class="blm-ap-cat"><?php esc_html_e( 'TRAIL', 'bandit-locations-map' ); ?></div>
+							<div class="blm-ap-title"><?php esc_html_e( 'Castle Rock', 'bandit-locations-map' ); ?></div>
+							<div class="blm-ap-rule"></div>
+							<div class="blm-ap-text"><?php esc_html_e( 'A short description of the location, shown in the drawer.', 'bandit-locations-map' ); ?></div>
+							<div class="blm-ap-stats">
+								<span><i><?php esc_html_e( 'DRIVE', 'bandit-locations-map' ); ?></i><b>45 min</b></span>
+								<span><i><?php esc_html_e( 'DIST', 'bandit-locations-map' ); ?></i><b>38 mi</b></span>
+							</div>
+							<span class="blm-ap-btn"><?php esc_html_e( 'Plan A Trip', 'bandit-locations-map' ); ?></span>
+						</div>
+						<div class="blm-ap-list">
+							<div class="blm-ap-row blm-ap-row--head"><span>#</span><span><?php esc_html_e( 'PLACE', 'bandit-locations-map' ); ?></span><span><?php esc_html_e( 'TYPE', 'bandit-locations-map' ); ?></span></div>
+							<div class="blm-ap-row"><span>01</span><span>Castle Rock</span><span>Trail</span></div>
+							<div class="blm-ap-row"><span>02</span><span>Old Town</span><span>Town</span></div>
+						</div>
+					</div>
+					<p class="description" style="margin-top:8px;"><?php esc_html_e( 'The preview uses the default palette as a baseline. Blank fields inherit your theme’s colors on the live site.', 'bandit-locations-map' ); ?></p>
+				</div>
+			</div>
 
 			<h3 style="margin-bottom:0;"><?php esc_html_e( 'Fonts', 'bandit-locations-map' ); ?></h3>
 			<table class="form-table">

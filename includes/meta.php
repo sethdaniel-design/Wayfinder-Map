@@ -64,15 +64,19 @@ function bandit_lm_get_all_points() {
  */
 function bandit_lm_appearance_colors() {
 	return array(
-		'color_primary'   => array( 'var' => '--blm-primary',   'label' => __( 'Primary / accent', 'bandit-locations-map' ),    'desc' => __( 'Buttons, active filter chip, hotel pin default.', 'bandit-locations-map' ) ),
-		'color_secondary' => array( 'var' => '--blm-secondary', 'label' => __( 'Secondary', 'bandit-locations-map' ),           'desc' => '' ),
-		'color_heading'   => array( 'var' => '--blm-heading',   'label' => __( 'Headings', 'bandit-locations-map' ),            'desc' => __( 'List header text and title accents.', 'bandit-locations-map' ) ),
-		'color_body'      => array( 'var' => '--blm-body',      'label' => __( 'Body text', 'bandit-locations-map' ),           'desc' => __( 'List row text.', 'bandit-locations-map' ) ),
-		'color_link'      => array( 'var' => '--blm-link',      'label' => __( 'Accent text / links', 'bandit-locations-map' ), 'desc' => __( 'Stat labels, tags, and numbers.', 'bandit-locations-map' ) ),
-		'color_dark'      => array( 'var' => '--blm-black',     'label' => __( 'Map background (dark surround)', 'bandit-locations-map' ), 'desc' => __( 'The dark area behind the map and drawer.', 'bandit-locations-map' ) ),
-		'color_light'     => array( 'var' => '--blm-canvas',    'label' => __( 'Light text on dark panels', 'bandit-locations-map' ),     'desc' => __( 'Drawer text color.', 'bandit-locations-map' ) ),
-		'color_panel'     => array( 'var' => '--blm-white',     'label' => __( 'List / light panel background', 'bandit-locations-map' ), 'desc' => '' ),
-		'color_rule'      => array( 'var' => '--blm-rule',      'label' => __( 'Borders / rules', 'bandit-locations-map' ),     'desc' => __( 'List and panel border lines.', 'bandit-locations-map' ) ),
+		// Accent colors
+		'color_accent'       => array( 'group' => 'Accents',       'var' => '--blm-primary',     'label' => __( 'Accent', 'bandit-locations-map' ),            'desc' => __( 'Buttons, active filter chip, CTA, hotel pin.', 'bandit-locations-map' ) ),
+		'color_detail'       => array( 'group' => 'Accents',       'var' => '--blm-link',        'label' => __( 'Detail accent', 'bandit-locations-map' ),     'desc' => __( 'Stat labels, tags, and list numbers.', 'bandit-locations-map' ) ),
+		// Map & info panel (dark areas)
+		'color_map_bg'       => array( 'group' => 'Map & panel',   'var' => '--blm-map-bg',      'label' => __( 'Map area background', 'bandit-locations-map' ), 'desc' => __( 'Behind and around the map image.', 'bandit-locations-map' ) ),
+		'color_panel_bg'     => array( 'group' => 'Map & panel',   'var' => '--blm-black',       'label' => __( 'Info panel background', 'bandit-locations-map' ), 'desc' => __( 'The side drawer background.', 'bandit-locations-map' ) ),
+		'color_on_dark'      => array( 'group' => 'Map & panel',   'var' => '--blm-canvas',      'label' => __( 'Text on dark areas', 'bandit-locations-map' ),  'desc' => __( 'Drawer text, titles, and pin labels.', 'bandit-locations-map' ) ),
+		// Location list (light table)
+		'color_list_bg'      => array( 'group' => 'Location list', 'var' => '--blm-list-bg',     'label' => __( 'List background', 'bandit-locations-map' ),     'desc' => '' ),
+		'color_list_header'  => array( 'group' => 'Location list', 'var' => '--blm-list-header', 'label' => __( 'List header bar', 'bandit-locations-map' ),     'desc' => __( 'Top row background and row dividers.', 'bandit-locations-map' ) ),
+		'color_list_heading' => array( 'group' => 'Location list', 'var' => '--blm-heading',     'label' => __( 'List headings & labels', 'bandit-locations-map' ), 'desc' => __( 'Column headers and category labels.', 'bandit-locations-map' ) ),
+		'color_list_text'    => array( 'group' => 'Location list', 'var' => '--blm-body',        'label' => __( 'List body text', 'bandit-locations-map' ),      'desc' => '' ),
+		'color_border'       => array( 'group' => 'Location list', 'var' => '--blm-rule',        'label' => __( 'Borders', 'bandit-locations-map' ),           'desc' => __( 'List outline and header divider.', 'bandit-locations-map' ) ),
 	);
 }
 

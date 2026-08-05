@@ -4,14 +4,17 @@
 
 .bandit-lm-root {
 	--blm-primary:   var(--gcid-primary-color, #ca5a35);
-	--blm-secondary: var(--gcid-secondary-color, #8aabad);
+	--blm-secondary: var(--gcid-secondary-color, #8aabad); /* kept for back-compat */
 	--blm-heading:   var(--gcid-heading-color, #5a2816);
 	--blm-body:      var(--gcid-body-color, #221e1e);
 	--blm-link:      var(--gcid-link-color, #ab792b);
-	--blm-canvas:    var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd);
-	--blm-white:     var(--gcid-x7w9lzfj-ejln-b30l-5v9z-bxck3yebtex5, #fcf8f2);
-	--blm-black:     #1c1917;
-	--blm-rule:      #d0c4a8;
+	--blm-canvas:    var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* text on dark areas */
+	--blm-white:     var(--gcid-x7w9lzfj-ejln-b30l-5v9z-bxck3yebtex5, #fcf8f2); /* text on accent buttons */
+	--blm-black:     #1c1917; /* info panel + stage background */
+	--blm-rule:      #d0c4a8; /* borders & dividers */
+	--blm-map-bg:    #241F1B; /* background behind/around the map image */
+	--blm-list-bg:   var(--gcid-x7w9lzfj-ejln-b30l-5v9z-bxck3yebtex5, #fcf8f2); /* list background */
+	--blm-list-header: var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* list header bar + row dividers */
 
 	--blm-font-heading:  var(--et_global_heading_font, 'SwimClub-WideSlab'), 'SwimClub WideSlab', serif;
 	--blm-font-body:     var(--et_global_body_font, 'Wigrum-regular'), 'Wigrum', system-ui, sans-serif;
@@ -48,7 +51,7 @@
 /* Map panel */
 .blm-map-panel {
 	position: relative;
-	background: #241F1B;
+	background: var(--blm-map-bg);
 	overflow: hidden;
 	min-height: 480px;
 	display: flex;
@@ -282,7 +285,7 @@
 .blm-drawer-rule { width: 36px; height: 2px; margin-bottom: 18px; }
 .blm-drawer-photo {
 	aspect-ratio: 5/3;
-	background: #241F1B;
+	background: var(--blm-map-bg);
 	margin-bottom: 22px;
 	overflow: hidden;
 	position: relative;
@@ -369,7 +372,7 @@
 /* List */
 .blm-list {
 	border: 1px solid var(--blm-rule);
-	background: var(--blm-white);
+	background: var(--blm-list-bg);
 	font-family: var(--blm-font-body);
 	color: var(--blm-body);
 }
@@ -377,7 +380,7 @@
 	display: grid;
 	grid-template-columns: 60px 1fr 130px 100px 100px 100px;
 	padding: 14px 24px;
-	background: var(--blm-canvas);
+	background: var(--blm-list-header);
 	border-bottom: 1px solid var(--blm-rule);
 	font-weight: 700;
 	font-size: 9px;
@@ -392,8 +395,8 @@
 	width: 100%;
 	text-align: left;
 	border: none;
-	background: var(--blm-white);
-	border-bottom: 1px solid var(--blm-canvas);
+	background: var(--blm-list-bg);
+	border-bottom: 1px solid var(--blm-list-header);
 	cursor: pointer;
 	font-family: var(--blm-font-body);
 	align-items: center;
@@ -401,7 +404,7 @@
 	color: var(--blm-body);
 }
 .blm-list-row:last-child { border-bottom: none; }
-.blm-list-row:hover { background: var(--blm-canvas); }
+.blm-list-row:hover { background: var(--blm-list-header); }
 .blm-list-cell-number { font-family: var(--blm-font-mono); font-size: 11px; color: var(--blm-link); }
 .blm-list-cell-name { font-size: 14px; font-weight: 600; color: var(--blm-body); }
 .blm-list-cell-category {

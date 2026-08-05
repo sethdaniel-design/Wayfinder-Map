@@ -199,6 +199,24 @@
 				document.getElementById('bandit_map_image_preview').innerHTML = '<em>No image set.</em>';
 			});
 		}
+
+		// Appearance: WordPress color pickers wired to the live preview.
+		if (typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.wpColorPicker) {
+			var preview = document.getElementById('blm-ap-preview');
+			jQuery('.blm-color-field').each(function () {
+				var field  = this;
+				var cssVar = field.getAttribute('data-cssvar');
+				function applyToPreview(value) {
+					if (!preview || !cssVar) return;
+					if (value) { preview.style.setProperty(cssVar, value); }
+					else { preview.style.removeProperty(cssVar); }
+				}
+				jQuery(field).wpColorPicker({
+					change: function (event, ui) { applyToPreview(ui.color.toString()); },
+					clear:  function () { applyToPreview(''); }
+				});
+			});
+		}
 	}
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

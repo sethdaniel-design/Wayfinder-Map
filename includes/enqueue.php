@@ -96,16 +96,17 @@ function bandit_lm_enqueue_admin( $hook ) {
 	$is_settings   = isset( $_GET['page'] ) && $_GET['page'] === 'bandit-lm-settings';
 	if ( ! $is_pin_editor && ! $is_settings ) { return; }
 
+	wp_enqueue_style( 'wp-color-picker' );
 	wp_enqueue_style(
 		'bandit-lm-admin',
 		BANDIT_LM_URL . 'assets/css/admin.css',
-		array(),
+		array( 'wp-color-picker' ),
 		BANDIT_LM_VERSION
 	);
 	wp_enqueue_script(
 		'bandit-lm-admin-pin-placer',
 		BANDIT_LM_URL . 'assets/js/admin-pin-placer.js',
-		array( 'jquery' ),
+		array( 'jquery', 'wp-color-picker' ),
 		BANDIT_LM_VERSION,
 		true
 	);
