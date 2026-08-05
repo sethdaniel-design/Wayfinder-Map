@@ -4,7 +4,7 @@ Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        1.0.4
+Stable tag:        1.1.0
 License:           GPL-2.0-or-later
 
 Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
@@ -68,6 +68,11 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 1.1.0 =
+* New **Appearance** section in Map Settings: override the map's colors (9 tokens) and fonts (heading / body / accent) directly from the admin.
+* Fonts can inherit from the theme, use a custom already-loaded family, or load a **Google Font** automatically.
+* Every appearance control defaults to "inherit," so existing installs look identical until a value is set.
 
 = 1.0.4 =
 * Renamed the plugin to **Wayfinder Map** and removed site-specific branding so it can be reused across sites. All user-facing labels, menus, and headings are now generic.

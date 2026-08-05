@@ -58,6 +58,45 @@ function bandit_lm_get_all_points() {
 }
 
 /**
+ * Appearance token maps — single source of truth shared by the settings UI
+ * (settings-page.php) and the CSS/asset injector (enqueue.php). Each color maps
+ * a settings key to a --blm-* CSS variable; a blank value means "inherit".
+ */
+function bandit_lm_appearance_colors() {
+	return array(
+		'color_primary'   => array( 'var' => '--blm-primary',   'label' => __( 'Primary / accent', 'bandit-locations-map' ),    'desc' => __( 'Buttons, active filter chip, hotel pin default.', 'bandit-locations-map' ) ),
+		'color_secondary' => array( 'var' => '--blm-secondary', 'label' => __( 'Secondary', 'bandit-locations-map' ),           'desc' => '' ),
+		'color_heading'   => array( 'var' => '--blm-heading',   'label' => __( 'Headings', 'bandit-locations-map' ),            'desc' => __( 'List header text and title accents.', 'bandit-locations-map' ) ),
+		'color_body'      => array( 'var' => '--blm-body',      'label' => __( 'Body text', 'bandit-locations-map' ),           'desc' => __( 'List row text.', 'bandit-locations-map' ) ),
+		'color_link'      => array( 'var' => '--blm-link',      'label' => __( 'Accent text / links', 'bandit-locations-map' ), 'desc' => __( 'Stat labels, tags, and numbers.', 'bandit-locations-map' ) ),
+		'color_dark'      => array( 'var' => '--blm-black',     'label' => __( 'Map background (dark surround)', 'bandit-locations-map' ), 'desc' => __( 'The dark area behind the map and drawer.', 'bandit-locations-map' ) ),
+		'color_light'     => array( 'var' => '--blm-canvas',    'label' => __( 'Light text on dark panels', 'bandit-locations-map' ),     'desc' => __( 'Drawer text color.', 'bandit-locations-map' ) ),
+		'color_panel'     => array( 'var' => '--blm-white',     'label' => __( 'List / light panel background', 'bandit-locations-map' ), 'desc' => '' ),
+		'color_rule'      => array( 'var' => '--blm-rule',      'label' => __( 'Borders / rules', 'bandit-locations-map' ),     'desc' => __( 'List and panel border lines.', 'bandit-locations-map' ) ),
+	);
+}
+
+/**
+ * Font roles. Each maps to a --blm-font-* CSS variable and carries a fallback
+ * stack appended after the chosen family. Source is one of inherit|custom|google.
+ */
+function bandit_lm_appearance_fonts() {
+	return array(
+		'font_heading' => array( 'var' => '--blm-font-heading', 'label' => __( 'Heading font', 'bandit-locations-map' ),        'fallback' => 'serif' ),
+		'font_body'    => array( 'var' => '--blm-font-body',    'label' => __( 'Body font', 'bandit-locations-map' ),           'fallback' => 'system-ui, sans-serif' ),
+		'font_accent'  => array( 'var' => '--blm-font-sub',     'label' => __( 'Accent / label font', 'bandit-locations-map' ), 'fallback' => 'sans-serif' ),
+	);
+}
+
+/**
+ * Strip a font-family string to a safe subset (letters, numbers, spaces,
+ * hyphens) so it can be embedded in CSS or a Google Fonts URL without injection.
+ */
+function bandit_lm_clean_font_family( $family ) {
+	return trim( preg_replace( '/[^A-Za-z0-9 \-]/', '', (string) $family ) );
+}
+
+/**
  * Global settings getter with sensible defaults.
  */
 function bandit_lm_get_settings() {
@@ -74,6 +113,14 @@ function bandit_lm_get_settings() {
 		'show_legend'    => 1,
 		'show_hotel_pin' => 1,
 	);
+	// Appearance overrides: colors default to '' (inherit), fonts to inherit/blank.
+	foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {
+		$defaults[ $ac_key ] = '';
+	}
+	foreach ( bandit_lm_appearance_fonts() as $af_key => $af_info ) {
+		$defaults[ $af_key . '_source' ] = 'inherit';
+		$defaults[ $af_key . '_family' ] = '';
+	}
 	$saved = get_option( 'bandit_lm_settings', array() );
 	if ( ! is_array( $saved ) ) { $saved = array(); }
 	$out   = wp_parse_args( $saved, $defaults );

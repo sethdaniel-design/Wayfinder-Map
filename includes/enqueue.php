@@ -29,6 +29,64 @@ function bandit_lm_enqueue_frontend() {
 		'categories' => bandit_lm_get_categories(),
 		'settings'   => bandit_lm_get_settings(),
 	) );
+
+	// Appearance: load any Google Fonts and inject --blm-* color/font overrides.
+	$google_font_url = bandit_lm_appearance_google_font_url();
+	if ( $google_font_url ) {
+		wp_enqueue_style( 'bandit-lm-google-fonts', $google_font_url, array(), null );
+	}
+	$inline_css = bandit_lm_appearance_inline_css();
+	if ( $inline_css ) {
+		wp_add_inline_style( 'bandit-lm-frontend', $inline_css );
+	}
+}
+
+/**
+ * Build inline CSS overriding --blm-* tokens for any appearance setting the user
+ * has filled in. Blank settings are skipped so the map keeps inheriting the theme.
+ */
+function bandit_lm_appearance_inline_css() {
+	$s     = bandit_lm_get_settings();
+	$decls = array();
+
+	foreach ( bandit_lm_appearance_colors() as $key => $info ) {
+		$val = isset( $s[ $key ] ) ? trim( (string) $s[ $key ] ) : '';
+		if ( $val !== '' && preg_match( '/^#([A-Fa-f0-9]{3}){1,2}$/', $val ) ) {
+			$decls[] = $info['var'] . ':' . $val;
+		}
+	}
+	foreach ( bandit_lm_appearance_fonts() as $key => $info ) {
+		$source = isset( $s[ $key . '_source' ] ) ? $s[ $key . '_source' ] : 'inherit';
+		if ( $source !== 'custom' && $source !== 'google' ) { continue; }
+		$family = bandit_lm_clean_font_family( isset( $s[ $key . '_family' ] ) ? $s[ $key . '_family' ] : '' );
+		if ( $family === '' ) { continue; }
+		$decls[] = $info['var'] . ":'" . $family . "'," . $info['fallback'];
+	}
+
+	return empty( $decls ) ? '' : '.bandit-lm-root{' . implode( ';', $decls ) . '}';
+}
+
+/**
+ * Assemble a Google Fonts URL for any font role whose source is "google".
+ * Uses the forgiving v1 CSS API (unavailable weights are ignored, not errored).
+ */
+function bandit_lm_appearance_google_font_url() {
+	$s        = bandit_lm_get_settings();
+	$families = array();
+
+	foreach ( bandit_lm_appearance_fonts() as $key => $info ) {
+		$source = isset( $s[ $key . '_source' ] ) ? $s[ $key . '_source' ] : 'inherit';
+		if ( $source !== 'google' ) { continue; }
+		$family = bandit_lm_clean_font_family( isset( $s[ $key . '_family' ] ) ? $s[ $key . '_family' ] : '' );
+		if ( $family !== '' ) { $families[ $family ] = true; }
+	}
+	if ( empty( $families ) ) { return ''; }
+
+	$parts = array();
+	foreach ( array_keys( $families ) as $family ) {
+		$parts[] = str_replace( ' ', '+', $family ) . ':400,500,600,700';
+	}
+	return 'https://fonts.googleapis.com/css?family=' . implode( '|', $parts ) . '&display=swap';
 }
 
 add_action( 'admin_enqueue_scripts', 'bandit_lm_enqueue_admin' );

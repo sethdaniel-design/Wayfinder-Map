@@ -36,6 +36,19 @@ function bandit_lm_sanitize_settings( $input ) {
 	$out['show_scale']     = ! empty( $input['show_scale'] ) ? 1 : 0;
 	$out['show_legend']    = ! empty( $input['show_legend'] ) ? 1 : 0;
 	$out['show_hotel_pin'] = ! empty( $input['show_hotel_pin'] ) ? 1 : 0;
+
+	// Appearance — colors (blank = inherit) and per-role font source/family.
+	foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {
+		$raw = isset( $input[ $ac_key ] ) ? trim( (string) $input[ $ac_key ] ) : '';
+		$out[ $ac_key ] = ( $raw === '' ) ? '' : ( sanitize_hex_color( $raw ) ?: '' );
+	}
+	$font_sources = array( 'inherit', 'custom', 'google' );
+	foreach ( bandit_lm_appearance_fonts() as $af_key => $af_info ) {
+		$src = isset( $input[ $af_key . '_source' ] ) ? $input[ $af_key . '_source' ] : 'inherit';
+		$out[ $af_key . '_source' ] = in_array( $src, $font_sources, true ) ? $src : 'inherit';
+		$out[ $af_key . '_family' ] = bandit_lm_clean_font_family( isset( $input[ $af_key . '_family' ] ) ? $input[ $af_key . '_family' ] : '' );
+	}
+
 	return $out;
 }
 
@@ -112,6 +125,48 @@ function bandit_lm_render_settings_page() {
 						<input type="color" value="<?php echo esc_attr( $s['hotel_color'] ); ?>" onchange="document.getElementById('bandit_hotel_color').value=this.value" style="vertical-align:middle;margin-left:8px;" />
 					</td>
 				</tr>
+			</table>
+
+			<h2><?php esc_html_e( 'Appearance', 'bandit-locations-map' ); ?></h2>
+			<p class="description" style="max-width:820px;margin-bottom:4px;">
+				<?php esc_html_e( 'Leave a color blank or a font set to “Inherit” to use your theme’s styling (the default). Fill in a value to override just that piece — everything else keeps inheriting.', 'bandit-locations-map' ); ?>
+			</p>
+
+			<h3 style="margin-bottom:0;"><?php esc_html_e( 'Colors', 'bandit-locations-map' ); ?></h3>
+			<table class="form-table">
+				<?php foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) :
+					$ac_val = isset( $s[ $ac_key ] ) ? $s[ $ac_key ] : '';
+				?>
+				<tr>
+					<th><label for="<?php echo esc_attr( $ac_key ); ?>"><?php echo esc_html( $ac_info['label'] ); ?></label></th>
+					<td>
+						<input type="text" id="<?php echo esc_attr( $ac_key ); ?>" name="bandit_lm_settings[<?php echo esc_attr( $ac_key ); ?>]" value="<?php echo esc_attr( $ac_val ); ?>" placeholder="<?php esc_attr_e( 'Inherit', 'bandit-locations-map' ); ?>" class="regular-text" style="max-width:130px;" />
+						<input type="color" value="<?php echo esc_attr( $ac_val ? $ac_val : '#cccccc' ); ?>" onchange="document.getElementById('<?php echo esc_js( $ac_key ); ?>').value=this.value" style="vertical-align:middle;margin-left:8px;" />
+						<?php if ( $ac_info['desc'] ) : ?><p class="description"><?php echo esc_html( $ac_info['desc'] ); ?></p><?php endif; ?>
+					</td>
+				</tr>
+				<?php endforeach; ?>
+			</table>
+
+			<h3 style="margin-bottom:0;"><?php esc_html_e( 'Fonts', 'bandit-locations-map' ); ?></h3>
+			<table class="form-table">
+				<?php foreach ( bandit_lm_appearance_fonts() as $af_key => $af_info ) :
+					$af_src = isset( $s[ $af_key . '_source' ] ) ? $s[ $af_key . '_source' ] : 'inherit';
+					$af_fam = isset( $s[ $af_key . '_family' ] ) ? $s[ $af_key . '_family' ] : '';
+				?>
+				<tr>
+					<th><label><?php echo esc_html( $af_info['label'] ); ?></label></th>
+					<td>
+						<select name="bandit_lm_settings[<?php echo esc_attr( $af_key ); ?>_source]">
+							<option value="inherit" <?php selected( $af_src, 'inherit' ); ?>><?php esc_html_e( 'Inherit from theme', 'bandit-locations-map' ); ?></option>
+							<option value="custom"  <?php selected( $af_src, 'custom' ); ?>><?php esc_html_e( 'Custom (already loaded by theme)', 'bandit-locations-map' ); ?></option>
+							<option value="google"  <?php selected( $af_src, 'google' ); ?>><?php esc_html_e( 'Google Font', 'bandit-locations-map' ); ?></option>
+						</select>
+						<input type="text" name="bandit_lm_settings[<?php echo esc_attr( $af_key ); ?>_family]" value="<?php echo esc_attr( $af_fam ); ?>" placeholder="<?php esc_attr_e( 'e.g. Poppins', 'bandit-locations-map' ); ?>" class="regular-text" style="max-width:220px;margin-left:8px;" />
+						<p class="description"><?php esc_html_e( 'Font family name — used when the source is Custom or Google Font. For Google Fonts, type the exact family name (e.g. “Poppins”, “DM Serif Display”) and it loads automatically.', 'bandit-locations-map' ); ?></p>
+					</td>
+				</tr>
+				<?php endforeach; ?>
 			</table>
 
 			<h2><?php esc_html_e( 'Display Options', 'bandit-locations-map' ); ?></h2>
