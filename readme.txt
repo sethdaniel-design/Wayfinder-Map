@@ -1,0 +1,85 @@
+=== Bandit Locations Map ===
+Contributors:      thebandithotel
+Tags:              map, locations, interactive map, points of interest, divi
+Requires at least: 6.0
+Tested up to:      6.5
+Requires PHP:      7.4
+Stable tag:        1.0.3
+License:           GPL-2.0-or-later
+
+Custom interactive locations map for The Bandit Hotel. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
+
+== Description ==
+
+A self-contained plugin for The Bandit Hotel's Locations page (or anywhere you need an editable interactive map).
+
+* **Custom Post Type** — every pin is a normal WordPress post you edit in the sidebar
+* **Visual pin placer** — click or drag a pin on your map image to set position; no coordinate math required
+* **Map-agnostic** — works with any 2D image: hand-illustrated, satellite, perspective, top-down
+* **Categories with colors** — each category (Park / Trail / Town / Airport / custom) has its own pin color
+* **Three shortcodes** — `[bandit_locations_map]`, `[bandit_locations_list]`, `[bandit_locations_full]`
+* **Divi 5 native styling** — inherits your `--gcid-*` color variables and `--et_global_*` fonts automatically
+* **No build step, no React on the frontend** — pure vanilla JS for a fast page load
+
+== Installation ==
+
+1. Upload `bandit-locations-map.zip` via Plugins → Add New → Upload Plugin
+2. Activate
+3. Go to **Bandit Map → Map Settings** to upload your map image and place the hotel pin
+4. Add categories at **Bandit Map → Pin Categories** (a few defaults are seeded for you)
+5. Add pins at **Bandit Map → Add Map Point**
+6. Drop the shortcode into any page or Divi module:
+   * `[bandit_locations_map]` — the interactive map with side drawer
+   * `[bandit_locations_list]` — the full sortable list table
+   * `[bandit_locations_full]` — both, stacked
+
+== Shortcode Options ==
+
+`[bandit_locations_map height="720" filter="All" show_filters="1"]`
+
+* `height` — minimum height in px (default 720)
+* `filter` — pre-select a category by name (default "All")
+* `show_filters` — `1` or `0` to show/hide the filter chip row
+
+`[bandit_locations_list filter="All"]`
+
+* `filter` — same as above
+
+`[bandit_locations_full height="720"]` — convenience wrapper that renders the map and list together
+
+== Frequently Asked Questions ==
+
+= Does the map have to be top-down? =
+
+No. Any 2D image works — perspective illustrations, axonometric maps, satellite tiles, or hand-drawn. Pins are placed in screen-space percentages, so the rendering is identical regardless of map style.
+
+= What if I swap the map image? =
+
+Pin positions are saved as X/Y percentages, so as long as the new map has the same proportions and same general geography, pins will still land roughly where you placed them. If proportions change, re-open each pin and click the new position on the map preview.
+
+= Does this work with Divi 5? =
+
+Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The plugin also reads Divi's CSS variables (`--gcid-*`, `--et_global_*`) automatically, so colors and fonts match the rest of your site.
+
+= Does it require ACF? =
+
+No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
+
+== Changelog ==
+
+= 1.0.3 =
+* Pin clicks now use event delegation at the SVG layer (single listener, survives all repaints) — fixes click failures on WordPress sites where third-party scripts may interfere with per-pin listeners.
+* Diagnostic `console.log` on pin click so you can verify in DevTools that clicks register.
+* Hide the pin-count HUD overlay on mobile (≤720px) so it no longer overlaps the filter chips.
+* CSS hardening with !important for pointer-events on pin layer — survives theme/plugin overrides.
+
+= 1.0.2 =
+* Hardened the Map Point save callback against unexpected errors (try/catch + debug.log diagnostic).
+* Removed `register_post_meta` REST registration — meta is now plugin-internal only. Smaller surface, no REST schema conflicts.
+* Stricter input casting and sanitization on save.
+
+= 1.0.1 =
+* Polyfill sanitize_hex_color() / sanitize_hex_color_no_hash() — fixes fatal "Call to undefined function" error on admin screens where the Customizer isn't loaded.
+
+= 1.0.0 =
+* Initial release

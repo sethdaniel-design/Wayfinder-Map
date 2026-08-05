@@ -1,0 +1,122 @@
+/* Bandit Locations Map — admin styles */
+
+.blm-placer {
+	max-width: 900px;
+	margin: 8px 0;
+}
+.blm-placer-inner {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16/9;
+	background: #f4efe6;
+	border: 1px solid #d0c4a8;
+	overflow: hidden;
+	cursor: crosshair;
+	user-select: none;
+}
+.blm-placer-bg {
+	position: absolute; inset: 0;
+	width: 100%; height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+}
+.blm-placer-fallback {
+	position: absolute; inset: 0;
+	display: flex; align-items: center; justify-content: center;
+	background: repeating-linear-gradient(135deg, #f4efe6, #f4efe6 20px, #ebe1cd 20px, #ebe1cd 21px);
+	color: #5a2816;
+	font-style: italic;
+	font-size: 13px;
+	text-align: center;
+	padding: 20px;
+}
+.blm-placer-pin {
+	position: absolute;
+	width: 28px; height: 28px;
+	transform: translate(-50%, -50%);
+	cursor: grab;
+	z-index: 4;
+}
+.blm-placer-pin.is-dragging { cursor: grabbing; }
+.blm-placer-pin-dot {
+	position: absolute; inset: 8px;
+	background: #CA5A35;
+	border: 2px solid #fcf8f2;
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.blm-placer-pin-ring {
+	position: absolute; inset: 0;
+	border: 2px solid #CA5A35;
+	border-radius: 50%;
+	opacity: 0.4;
+	animation: blm-pin-pulse 2s infinite ease-in-out;
+}
+@keyframes blm-pin-pulse {
+	0%, 100% { transform: scale(1); opacity: 0.4; }
+	50% { transform: scale(1.4); opacity: 0; }
+}
+.blm-placer-hotel {
+	position: absolute;
+	width: 20px; height: 20px;
+	transform: translate(-50%, -50%);
+	border: 2px solid #CA5A35;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.6);
+	z-index: 3;
+	display: flex; align-items: center; justify-content: center;
+	pointer-events: none;
+}
+.blm-placer-hotel span {
+	width: 8px; height: 8px; border-radius: 50%; background: #CA5A35;
+}
+.blm-placer-hotel label {
+	position: absolute;
+	bottom: -18px; left: 50%;
+	transform: translateX(-50%);
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #5a2816;
+	white-space: nowrap;
+	background: rgba(255,255,255,0.9);
+	padding: 2px 6px;
+	border: 1px solid #d0c4a8;
+}
+.blm-placer-hline, .blm-placer-vline {
+	position: absolute;
+	background: rgba(202,90,53,0.3);
+	pointer-events: none;
+	z-index: 2;
+}
+.blm-placer-hline { left: 0; right: 0; height: 1px; }
+.blm-placer-vline { top: 0; bottom: 0; width: 1px; }
+
+.blm-placer-readout {
+	display: inline-block;
+	margin-top: 10px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 12px;
+	padding: 4px 10px;
+	background: #1c1917;
+	color: #ebe1cd;
+	border-radius: 3px;
+}
+.blm-placer-help {
+	display: inline-block;
+	margin-left: 10px;
+	margin-top: 10px;
+	font-size: 12px;
+	color: #555;
+	font-style: italic;
+}
+
+.bandit-lm-settings .form-table th { width: 200px; }
+.bandit-lm-settings code {
+	background: #f4efe6;
+	padding: 2px 6px;
+	border: 1px solid #e0d6c2;
+	border-radius: 2px;
+	color: #5a2816;
+}
