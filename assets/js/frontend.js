@@ -1,5 +1,5 @@
 /**
- * Bandit Locations Map — frontend renderer (vanilla JS, no dependencies)
+ * Wayfinder Map — frontend renderer (vanilla JS, no dependencies)
  * Hydrates any element with .bandit-lm-root, reading window.BanditLocationsData.
  */
 (function () {
@@ -159,7 +159,6 @@
 		pinSvg.addEventListener('click', function (e) {
 			var id = pinIdFromTarget(e.target);
 			if (id === null) return;
-			if (window.console && window.console.log) window.console.log('[Bandit Map] Pin clicked:', id);
 			activeId = id;
 			paint();
 		});
@@ -475,7 +474,7 @@
 
 				drawer.appendChild(body);
 			} else {
-				drawer.appendChild(el('div', { className: 'blm-empty' }, ['No map points yet. Add some in Bandit Map → Add Map Point.']));
+				drawer.appendChild(el('div', { className: 'blm-empty' }, ['No map points yet. Add some in Wayfinder Map → Add Map Point.']));
 			}
 		}
 

@@ -1,51 +1,53 @@
-=== Bandit Locations Map ===
-Contributors:      thebandithotel
+=== Wayfinder Map ===
+Contributors:      sethdanieldesign
 Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        1.0.3
+Stable tag:        1.0.4
 License:           GPL-2.0-or-later
 
-Custom interactive locations map for The Bandit Hotel. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
+Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
 
 == Description ==
 
-A self-contained plugin for The Bandit Hotel's Locations page (or anywhere you need an editable interactive map).
+A self-contained plugin for any Locations page (or anywhere you need an editable interactive map).
 
 * **Custom Post Type** — every pin is a normal WordPress post you edit in the sidebar
 * **Visual pin placer** — click or drag a pin on your map image to set position; no coordinate math required
 * **Map-agnostic** — works with any 2D image: hand-illustrated, satellite, perspective, top-down
 * **Categories with colors** — each category (Park / Trail / Town / Airport / custom) has its own pin color
-* **Three shortcodes** — `[bandit_locations_map]`, `[bandit_locations_list]`, `[bandit_locations_full]`
+* **Three shortcodes** — `[wayfinder_map]`, `[wayfinder_list]`, `[wayfinder_full]`
 * **Divi 5 native styling** — inherits your `--gcid-*` color variables and `--et_global_*` fonts automatically
 * **No build step, no React on the frontend** — pure vanilla JS for a fast page load
 
 == Installation ==
 
-1. Upload `bandit-locations-map.zip` via Plugins → Add New → Upload Plugin
+1. Upload `wayfinder-map.zip` via Plugins → Add New → Upload Plugin
 2. Activate
-3. Go to **Bandit Map → Map Settings** to upload your map image and place the hotel pin
-4. Add categories at **Bandit Map → Pin Categories** (a few defaults are seeded for you)
-5. Add pins at **Bandit Map → Add Map Point**
+3. Go to **Wayfinder Map → Map Settings** to upload your map image and place the hotel pin
+4. Add categories at **Wayfinder Map → Pin Categories** (a few defaults are seeded for you)
+5. Add pins at **Wayfinder Map → Add Map Point**
 6. Drop the shortcode into any page or Divi module:
-   * `[bandit_locations_map]` — the interactive map with side drawer
-   * `[bandit_locations_list]` — the full sortable list table
-   * `[bandit_locations_full]` — both, stacked
+   * `[wayfinder_map]` — the interactive map with side drawer
+   * `[wayfinder_list]` — the full sortable list table
+   * `[wayfinder_full]` — both, stacked
 
 == Shortcode Options ==
 
-`[bandit_locations_map height="720" filter="All" show_filters="1"]`
+`[wayfinder_map height="720" filter="All" show_filters="1"]`
 
 * `height` — minimum height in px (default 720)
 * `filter` — pre-select a category by name (default "All")
 * `show_filters` — `1` or `0` to show/hide the filter chip row
 
-`[bandit_locations_list filter="All"]`
+`[wayfinder_list filter="All"]`
 
 * `filter` — same as above
 
-`[bandit_locations_full height="720"]` — convenience wrapper that renders the map and list together
+`[wayfinder_full height="720"]` — convenience wrapper that renders the map and list together
+
+Note: the original `[bandit_locations_map]`, `[bandit_locations_list]`, and `[bandit_locations_full]` shortcodes still work as aliases, so existing embeds keep functioning.
 
 == Frequently Asked Questions ==
 
@@ -66,6 +68,11 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 1.0.4 =
+* Renamed the plugin to **Wayfinder Map** and removed site-specific branding so it can be reused across sites. All user-facing labels, menus, and headings are now generic.
+* Added generic `[wayfinder_map]` / `[wayfinder_list]` / `[wayfinder_full]` shortcodes. The original `[bandit_locations_*]` shortcodes remain as backwards-compatible aliases.
+* Aligned the plugin header version with the internal version constant.
 
 = 1.0.3 =
 * Pin clicks now use event delegation at the SVG layer (single listener, survives all repaints) — fixes click failures on WordPress sites where third-party scripts may interfere with per-pin listeners.

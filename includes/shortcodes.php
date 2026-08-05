@@ -5,6 +5,12 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+// Primary (generic) shortcode names.
+add_shortcode( 'wayfinder_map',   'bandit_lm_shortcode_map' );
+add_shortcode( 'wayfinder_list',  'bandit_lm_shortcode_list' );
+add_shortcode( 'wayfinder_full',  'bandit_lm_shortcode_full' );
+
+// Backwards-compatible aliases — keep existing embeds ([bandit_locations_*]) working.
 add_shortcode( 'bandit_locations_map',  'bandit_lm_shortcode_map' );
 add_shortcode( 'bandit_locations_list', 'bandit_lm_shortcode_list' );
 add_shortcode( 'bandit_locations_full', 'bandit_lm_shortcode_full' );

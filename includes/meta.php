@@ -66,7 +66,7 @@ function bandit_lm_get_settings() {
 		'map_image_url'  => '',
 		'hotel_x'        => 50.0,
 		'hotel_y'        => 50.0,
-		'hotel_label'    => 'The Bandit',
+		'hotel_label'    => 'Your Location',
 		'hotel_sublabel' => 'YOU ARE HERE',
 		'hotel_color'    => '#CA5A35',
 		'show_compass'   => 1,
@@ -110,6 +110,6 @@ function bandit_lm_get_categories() {
  */
 function bandit_lm_log( $msg ) {
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-		error_log( '[Bandit Map] ' . $msg );
+		error_log( '[Wayfinder Map] ' . $msg );
 	}
 }

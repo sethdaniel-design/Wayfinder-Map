@@ -19,7 +19,7 @@ function bandit_lm_register_cpt() {
 		'search_items'       => __( 'Search Map Points', 'bandit-locations-map' ),
 		'not_found'          => __( 'No map points found', 'bandit-locations-map' ),
 		'not_found_in_trash' => __( 'No map points in trash', 'bandit-locations-map' ),
-		'menu_name'          => __( 'Bandit Map', 'bandit-locations-map' ),
+		'menu_name'          => __( 'Wayfinder Map', 'bandit-locations-map' ),
 		'all_items'          => __( 'All Map Points', 'bandit-locations-map' ),
 	);
 

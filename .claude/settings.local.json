@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(perl -i -pe 's/Bandit Map/Wayfinder Map/g; s/\\\\[bandit_locations_map\\\\]/[wayfinder_map]/g; s/\\\\[bandit_locations_list\\\\]/[wayfinder_list]/g; s/\\\\[bandit_locations_full\\\\]/[wayfinder_full]/g;' includes/settings-page.php)",
+      "Bash(perl -i -pe 's/=== Bandit Locations Map ===/=== Wayfinder Map ===/; s/thebandithotel/sethdanieldesign/g; s/Stable tag:        1\\\\.0\\\\.3/Stable tag:        1.0.4/; s/\\\\[bandit_locations_map\\\\]/[wayfinder_map]/g; s/\\\\[bandit_locations_list\\\\]/[wayfinder_list]/g; s/\\\\[bandit_locations_full\\\\]/[wayfinder_full]/g; s/bandit-locations-map\\\\.zip/wayfinder-map.zip/g; s/\\\\bBandit Map\\\\b/Wayfinder Map/g;' readme.txt)",
+      "Bash(perl -i -pe \"s/\\\\[Bandit Map\\\\]/[Wayfinder Map]/g;\" includes/meta.php)",
+      "Bash(perl -i -pe \"s/Bandit Locations Map/Wayfinder Map/g;\" assets/js/frontend.js assets/css/admin.css)",
+      "Bash(perl -i -pe \"s/Bandit Locations Map/Wayfinder Map/g; s/falls back to Bandit brand defaults/falls back to sensible defaults/g;\" assets/css/frontend.css)",
+      "Bash(perl -i -pe \"s/Bandit Map/Wayfinder Map/g;\" assets/js/admin-pin-placer.js)"
+    ]
+  }
+}

@@ -32,7 +32,7 @@
 		} else {
 			var fb = document.createElement('div');
 			fb.className = 'blm-placer-fallback';
-			fb.textContent = 'Upload a map image in Bandit Map → Map Settings first.';
+			fb.textContent = 'Upload a map image in Wayfinder Map → Map Settings first.';
 			inner.appendChild(fb);
 		}
 

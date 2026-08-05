@@ -29,7 +29,7 @@ function bandit_lm_sanitize_settings( $input ) {
 	$out['map_image_id']   = isset( $input['map_image_id'] ) ? (int) $input['map_image_id'] : 0;
 	$out['hotel_x']        = isset( $input['hotel_x'] ) ? max( 0, min( 100, floatval( $input['hotel_x'] ) ) ) : 50.0;
 	$out['hotel_y']        = isset( $input['hotel_y'] ) ? max( 0, min( 100, floatval( $input['hotel_y'] ) ) ) : 50.0;
-	$out['hotel_label']    = isset( $input['hotel_label'] ) ? sanitize_text_field( $input['hotel_label'] ) : 'The Bandit';
+	$out['hotel_label']    = isset( $input['hotel_label'] ) ? sanitize_text_field( $input['hotel_label'] ) : 'Your Location';
 	$out['hotel_sublabel'] = isset( $input['hotel_sublabel'] ) ? sanitize_text_field( $input['hotel_sublabel'] ) : '';
 	$out['hotel_color']    = isset( $input['hotel_color'] ) ? ( sanitize_hex_color( $input['hotel_color'] ) ?: '#CA5A35' ) : '#CA5A35';
 	$out['show_compass']   = ! empty( $input['show_compass'] ) ? 1 : 0;
@@ -45,7 +45,7 @@ function bandit_lm_render_settings_page() {
 	wp_enqueue_media();
 	?>
 	<div class="wrap bandit-lm-settings">
-		<h1><?php esc_html_e( 'Bandit Map — Global Settings', 'bandit-locations-map' ); ?></h1>
+		<h1><?php esc_html_e( 'Wayfinder Map — Global Settings', 'bandit-locations-map' ); ?></h1>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'bandit_lm_settings_group' ); ?>
@@ -138,13 +138,13 @@ function bandit_lm_render_settings_page() {
 		<ol style="max-width:780px;line-height:1.7;">
 			<li><strong><?php esc_html_e( 'Upload the map image above.', 'bandit-locations-map' ); ?></strong> <?php esc_html_e( 'Hand-illustrated, satellite, topographic — any 2D image works.', 'bandit-locations-map' ); ?></li>
 			<li><strong><?php esc_html_e( 'Position the hotel pin.', 'bandit-locations-map' ); ?></strong> <?php esc_html_e( 'Click the map preview above.', 'bandit-locations-map' ); ?></li>
-			<li><strong><?php esc_html_e( 'Add pin categories.', 'bandit-locations-map' ); ?></strong> <?php esc_html_e( 'Bandit Map → Pin Categories. Each category has its own color.', 'bandit-locations-map' ); ?></li>
-			<li><strong><?php esc_html_e( 'Add map points.', 'bandit-locations-map' ); ?></strong> <?php esc_html_e( 'Bandit Map → Add Map Point. Click on the live map preview to place each pin.', 'bandit-locations-map' ); ?></li>
+			<li><strong><?php esc_html_e( 'Add pin categories.', 'bandit-locations-map' ); ?></strong> <?php esc_html_e( 'Wayfinder Map → Pin Categories. Each category has its own color.', 'bandit-locations-map' ); ?></li>
+			<li><strong><?php esc_html_e( 'Add map points.', 'bandit-locations-map' ); ?></strong> <?php esc_html_e( 'Wayfinder Map → Add Map Point. Click on the live map preview to place each pin.', 'bandit-locations-map' ); ?></li>
 			<li><strong><?php esc_html_e( 'Embed in any page or Divi module:', 'bandit-locations-map' ); ?></strong>
 				<ul style="margin-left:24px;list-style:disc;">
-					<li><code>[bandit_locations_map]</code> — <?php esc_html_e( 'the interactive map with drawer', 'bandit-locations-map' ); ?></li>
-					<li><code>[bandit_locations_list]</code> — <?php esc_html_e( 'the full sortable list table', 'bandit-locations-map' ); ?></li>
-					<li><code>[bandit_locations_full]</code> — <?php esc_html_e( 'map + list, stacked', 'bandit-locations-map' ); ?></li>
+					<li><code>[wayfinder_map]</code> — <?php esc_html_e( 'the interactive map with drawer', 'bandit-locations-map' ); ?></li>
+					<li><code>[wayfinder_list]</code> — <?php esc_html_e( 'the full sortable list table', 'bandit-locations-map' ); ?></li>
+					<li><code>[wayfinder_full]</code> — <?php esc_html_e( 'map + list, stacked', 'bandit-locations-map' ); ?></li>
 				</ul>
 			</li>
 		</ol>
