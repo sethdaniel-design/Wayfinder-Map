@@ -66,12 +66,13 @@
 	user-select: none;
 }
 .blm-map-panel.is-grabbing { cursor: grabbing; }
-.blm-map-panel.is-grabbing .blm-map-canvas { transition: none; }
 
 .blm-map-canvas {
 	position: relative;
 	transform-origin: center center;
-	transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+	/* No transition: the image (CSS transform) and the pin layer (SVG viewBox) must
+	   move in exact lockstep. A transition would ease the image while the vector pins
+	   snap, desyncing them for ~180ms — the "floaty"/disorienting feel while zooming. */
 	will-change: transform;
 }
 

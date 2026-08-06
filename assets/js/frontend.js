@@ -94,6 +94,10 @@
 
 		// Pan / zoom state (translation in container pixels, scale multiplier)
 		var tx = 0, ty = 0, scale = 1;
+		// Pan/zoom state at the last crisp pin-layer sync (syncPinViewBox). During an
+		// active drag we translate the pin layer by the delta from these on the GPU
+		// instead of re-rendering its viewBox every frame (fast, no desync/stutter).
+		var vbTx = 0, vbTy = 0;
 		var MIN_SCALE = 1;
 		var MAX_SCALE = 5;
 
@@ -292,6 +296,8 @@
 			var A = pw / 2 - 0.5 * cw * scale + tx; // panel-px x of image-space x=0
 			var B = ph / 2 - 0.5 * ch * scale + ty; // panel-px y of image-space y=0
 			pinSvg.setAttribute('viewBox', (-A / k) + ' ' + (-B / k) + ' ' + (pw / k) + ' ' + (ph / k));
+			pinSvg.style.transform = '';   // clear any fast-pan translate
+			vbTx = tx; vbTy = ty;          // remember the reference this viewBox was built for
 		}
 		function applyTransform() {
 			if (canvas) canvas.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
@@ -299,6 +305,16 @@
 			zoomCtrls.classList.toggle('is-zoomed', scale > 1.01 || Math.abs(tx) > 1 || Math.abs(ty) > 1);
 			applyPinScale();
 		}
+		// Cheap per-frame update used DURING a live drag: move the image and the
+		// (already-rendered, crisp) pin layer together with a GPU translate, without
+		// re-rasterising the SVG viewBox each frame. settlePan() then re-syncs crisp.
+		// Scale is unchanged during a pan, so a plain translate keeps them locked.
+		function panFast() {
+			if (canvas) canvas.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+			if (pinSvg) pinSvg.style.transform = 'translate(' + (tx - vbTx) + 'px,' + (ty - vbTy) + 'px)';
+			zoomCtrls.classList.toggle('is-zoomed', scale > 1.01 || Math.abs(tx) > 1 || Math.abs(ty) > 1);
+		}
+		function settlePan() { applyTransform(); }
 		function constrain() {
 			if (!canvas) return;
 			var panelRect = mapPanel.getBoundingClientRect();
@@ -388,10 +404,10 @@
 			tx += dx; ty += dy;
 			lastX = e.clientX; lastY = e.clientY;
 			constrain();
-			applyTransform();
+			panFast();
 		});
 		window.addEventListener('mouseup', function () {
-			if (dragging) { dragging = false; mapPanel.classList.remove('is-grabbing'); }
+			if (dragging) { dragging = false; mapPanel.classList.remove('is-grabbing'); settlePan(); }
 		});
 
 		// Scroll-wheel zoom (only when hovering map)
@@ -430,7 +446,7 @@
 				tx += dx; ty += dy;
 				touchState.x = t.clientX; touchState.y = t.clientY;
 				constrain();
-				applyTransform();
+				panFast();
 				if (touchState.moved) e.preventDefault();
 			} else if (touchState.type === 'pinch' && e.touches.length === 2) {
 				e.preventDefault();
@@ -442,8 +458,14 @@
 				setScale(touchState.startScale * (dist / touchState.startDist), cx, cy);
 			}
 		}, { passive: false });
-		mapPanel.addEventListener('touchend', function () { touchState = null; });
-		mapPanel.addEventListener('touchcancel', function () { touchState = null; });
+		mapPanel.addEventListener('touchend', function () {
+			if (touchState && touchState.type === 'pan') settlePan(); // re-render crisp after the drag
+			touchState = null;
+		});
+		mapPanel.addEventListener('touchcancel', function () {
+			if (touchState && touchState.type === 'pan') settlePan();
+			touchState = null;
+		});
 
 		// ----- Build/refresh pins + drawer (called any time selection/filter changes) -----
 		function paint() {
@@ -613,8 +635,11 @@
 			imgNaturalW = 0; imgNaturalH = 0; vbHeight = 100;
 			activeId = PINS[0] ? PINS[0].id : null;
 
-			// Tear down the previous map's content.
+			// Tear down the previous map's content. The pin layer is now a sibling of
+			// the canvas (not a child), so it must be removed explicitly — otherwise
+			// each map switch would stack another map's pins/lines/labels on top.
 			if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+			if (pinSvg && pinSvg.parentNode) pinSvg.parentNode.removeChild(pinSvg);
 			if (legend && legend.parentNode) legend.parentNode.removeChild(legend);
 			if (compassEl && compassEl.parentNode) compassEl.parentNode.removeChild(compassEl);
 			legend = null; compassEl = null;
