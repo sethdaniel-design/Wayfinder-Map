@@ -327,9 +327,17 @@
 			if (!cw || !ch || !pr.width || !pr.height) return 1;
 			return Math.max(pr.width / cw, pr.height / ch);
 		}
+		// Pan so the given pin sits at the panel centre (clamped by constrain()).
+		function centerOnActive() {
+			var p = getActive();
+			if (!p || !canvas) { tx = 0; ty = 0; return; }
+			var cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+			tx = -((p.x / 100) - 0.5) * cw * scale;
+			ty = -((p.y / 100) - 0.5) * ch * scale;
+		}
 		function applyCover() {
 			scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, coverScale()));
-			tx = 0; ty = 0;
+			centerOnActive();
 			constrain();
 			applyTransform();
 		}
@@ -701,6 +709,9 @@
 			var tp = PINS.filter(function (x) { return x.id === id; })[0];
 			if (tp && filter !== 'All' && tp.category !== filter) { filter = 'All'; }
 			paint();
+			centerOnActive();
+			constrain();
+			applyTransform();
 			if (e.detail.scroll !== false) {
 				root.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
