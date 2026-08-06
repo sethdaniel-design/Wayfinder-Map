@@ -4,7 +4,7 @@ Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        2.0.0
+Stable tag:        2.1.0
 License:           GPL-2.0-or-later
 
 Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
@@ -40,7 +40,7 @@ A self-contained plugin for any Locations page (or anywhere you need an editable
 
 * `height` — minimum height in px (default 720)
 * `filter` — pre-select a category by name (default "All")
-* `show_filters` — `1` or `0` to show/hide the filter chip row
+* `show_filters` — `1` or `0` to show/hide the category Filter dropdown in the legend
 
 `[wayfinder_list filter="All"]`
 
@@ -69,6 +69,11 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 2.1.0 =
+* Moved the map switcher to the top-left and removed the separate filter chip row (it was overlapping the switcher).
+* Category filtering now lives in the **legend**: it shows up to 5 categories as a colour key, with a **Filter** dropdown listing every category.
+* Added an **eye button** to hide/show the on-map overlays (switcher, legend, HUD, compass) for a clean view.
 
 = 2.0.0 =
 * **Multiple maps.** Create any number of maps (Wayfinder Map → Maps), each with its own background image, hotel pin, and display toggles. A switcher bar above the map lets visitors flip between them instantly.

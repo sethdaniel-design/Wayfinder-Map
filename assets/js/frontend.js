@@ -124,14 +124,11 @@
 			mapPanel.appendChild(switcher);
 		}
 
-		var chipRow = showFilters ? el('div', { className: 'blm-chiprow' }) : null;
-		if (chipRow) mapPanel.appendChild(chipRow);
-
 		var hudTR = el('div', { className: 'blm-hud-tr' });
 		mapPanel.appendChild(hudTR);
 
 		// Per-map elements — reassigned by loadMap().
-		var canvas = null, bgImg = null, pinSvg = null, legend = null, compassEl = null;
+		var canvas = null, bgImg = null, pinSvg = null, legend = null, compassEl = null, legendFilterLabel = null;
 		var imgNaturalW = 0, imgNaturalH = 0, vbHeight = 100;
 
 		// Zoom controls overlay (persistent)
@@ -189,6 +186,31 @@
 		}
 		function fsEsc(e) { if ((e.key === 'Escape' || e.keyCode === 27) && fsActive()) exitFs(); }
 		function toggleFs() { fsActive() ? exitFs() : enterFs(); }
+
+		// Hide/show the map overlays (switcher, legend, HUD, compass).
+		var eyeIconOpen = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+		var eyeIconClosed = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+		var eyeBtn = el('button', {
+			type: 'button', className: 'blm-zoom-btn blm-eye-btn', 'aria-label': 'Hide overlays', title: 'Hide overlays',
+			onClick: function () {
+				var hidden = mapPanel.classList.toggle('blm-ui-hidden');
+				eyeBtn.innerHTML = hidden ? eyeIconClosed : eyeIconOpen;
+				eyeBtn.setAttribute('aria-label', hidden ? 'Show overlays' : 'Hide overlays');
+			}
+		});
+		eyeBtn.innerHTML = eyeIconOpen;
+		zoomCtrls.insertBefore(eyeBtn, zoomCtrls.firstChild);
+
+		// Category filtering now lives in the legend (top chip row removed).
+		function setFilter(name) { filter = name; paint(); syncLegend(); }
+		function syncLegend() {
+			if (!legend) return;
+			var items = legend.querySelectorAll('[data-cat]');
+			for (var i = 0; i < items.length; i++) {
+				items[i].classList.toggle('is-active', items[i].getAttribute('data-cat') === filter);
+			}
+			if (legendFilterLabel) legendFilterLabel.textContent = (filter === 'All') ? 'Filter' : filter;
+		}
 
 		// ----- Pin interaction delegation (re-attached to each map's fresh SVG) -----
 		function pinIdFromTarget(target) {
@@ -287,7 +309,7 @@
 		// Mouse drag (skip if click started on an interactive control OR on a pin)
 		var dragging = false, lastX = 0, lastY = 0, dragMoved = false;
 		mapPanel.addEventListener('mousedown', function (e) {
-			if (e.target.closest && e.target.closest('.blm-chip, .blm-zoom-btn, .blm-pin, .blm-hotel-pin')) return;
+			if (e.target.closest && e.target.closest('.blm-zoom-btn, .blm-pin, .blm-hotel-pin, .blm-switcher, .blm-legend')) return;
 			dragging = true; dragMoved = false;
 			lastX = e.clientX; lastY = e.clientY;
 			mapPanel.classList.add('is-grabbing');
@@ -320,7 +342,7 @@
 		function touchDist(a, b) { return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY); }
 		function touchCenter(a, b) { return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 }; }
 		mapPanel.addEventListener('touchstart', function (e) {
-			if (e.target.closest && e.target.closest('.blm-chip, .blm-zoom-btn, .blm-pin, .blm-hotel-pin')) return;
+			if (e.target.closest && e.target.closest('.blm-zoom-btn, .blm-pin, .blm-hotel-pin, .blm-switcher, .blm-legend')) return;
 			if (e.touches.length === 1) {
 				touchState = { type: 'pan', x: e.touches[0].clientX, y: e.touches[0].clientY, moved: false };
 			} else if (e.touches.length === 2) {
@@ -358,22 +380,6 @@
 
 		// ----- Build/refresh pins + drawer (called any time selection/filter changes) -----
 		function paint() {
-			// Chip row
-			if (chipRow) {
-				chipRow.innerHTML = '';
-				var allCats = [{ name: 'All', color: 'var(--gcid-heading-color, #5A2816)' }].concat(CATS);
-				allCats.forEach(function (c) {
-					var active = filter === c.name;
-					var chip = el('button', {
-						type: 'button',
-						className: 'blm-chip' + (active ? ' is-active' : ''),
-						style: active ? { background: c.color, borderColor: c.color, color: '#FCF8F2' } : {},
-						onClick: function () { filter = c.name; paint(); }
-					}, [c.name]);
-					chipRow.appendChild(chip);
-				});
-			}
-
 			// HUD readout
 			hudTR.innerHTML = '';
 			hudTR.appendChild(el('div', null, [(SETTINGS.hotel_label || 'Hotel') + ' · ' + visible().length + ' pins']));
@@ -564,14 +570,45 @@
 			attachPinListeners(pinSvg);
 
 			// Per-map overlays.
+			legendFilterLabel = null;
 			if (SETTINGS.show_legend && CATS.length) {
 				legend = el('div', { className: 'blm-legend' });
-				CATS.forEach(function (c) {
-					legend.appendChild(el('div', { className: 'blm-legend-row' }, [
+				// Up to 5 categories as a colour key (each also filters the map).
+				CATS.slice(0, 5).forEach(function (c) {
+					legend.appendChild(el('button', {
+						type: 'button',
+						className: 'blm-legend-row' + (filter === c.name ? ' is-active' : ''),
+						'data-cat': c.name,
+						onClick: function () { setFilter(filter === c.name ? 'All' : c.name); }
+					}, [
 						el('span', { className: 'blm-legend-dot', style: { background: c.color } }),
 						el('span', { className: 'blm-legend-label' }, [c.name])
 					]));
 				});
+				// A "Filter" dropdown with every category (also the "show more").
+				if (showFilters) {
+					var fWrap = el('div', { className: 'blm-legend-filter' });
+					legendFilterLabel = el('span', { className: 'blm-legend-filter-label' }, [filter === 'All' ? 'Filter' : filter]);
+					var fBtn = el('button', {
+						type: 'button', className: 'blm-legend-filter-btn',
+						onClick: function () { fWrap.classList.toggle('is-open'); }
+					}, [legendFilterLabel, el('span', { className: 'blm-legend-caret' }, ['▾'])]);
+					var menu = el('div', { className: 'blm-legend-menu' });
+					[{ name: 'All', color: '' }].concat(CATS).forEach(function (c) {
+						menu.appendChild(el('button', {
+							type: 'button',
+							className: 'blm-legend-menu-item' + (filter === c.name ? ' is-active' : ''),
+							'data-cat': c.name,
+							onClick: function () { setFilter(c.name); fWrap.classList.remove('is-open'); }
+						}, [
+							el('span', { className: 'blm-legend-dot', style: { background: c.color || 'transparent' } }),
+							el('span', null, [c.name])
+						]));
+					});
+					fWrap.appendChild(fBtn);
+					fWrap.appendChild(menu);
+					legend.appendChild(fWrap);
+				}
 				mapPanel.appendChild(legend);
 			}
 			if (SETTINGS.show_compass) {
