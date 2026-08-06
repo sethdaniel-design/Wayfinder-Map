@@ -3,7 +3,7 @@
  * Plugin Name:       Wayfinder Map
  * Plugin URI:        https://sethdanieldesign.com
  * Description:       Custom interactive locations map. Provides a Custom Post Type for map pins, a visual pin-placement tool, a global settings page, and shortcodes ([wayfinder_map], [wayfinder_list], [wayfinder_full]) for embedding the map anywhere — including Divi 5 Code/Text modules.
- * Version:           1.7.1
+ * Version:           2.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Seth Daniel Design
@@ -16,7 +16,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'BANDIT_LM_VERSION', '1.7.1' );
+define( 'BANDIT_LM_VERSION', '2.0.0' );
 define( 'BANDIT_LM_FILE',    __FILE__ );
 define( 'BANDIT_LM_DIR',     plugin_dir_path( __FILE__ ) );
 define( 'BANDIT_LM_URL',     plugin_dir_url( __FILE__ ) );
@@ -50,6 +50,7 @@ if ( ! function_exists( 'sanitize_hex_color_no_hash' ) ) {
 
 require_once BANDIT_LM_DIR . 'includes/cpt.php';
 require_once BANDIT_LM_DIR . 'includes/meta.php';
+require_once BANDIT_LM_DIR . 'includes/maps.php';
 require_once BANDIT_LM_DIR . 'includes/admin-metaboxes.php';
 require_once BANDIT_LM_DIR . 'includes/settings-page.php';
 require_once BANDIT_LM_DIR . 'includes/shortcodes.php';
@@ -57,6 +58,7 @@ require_once BANDIT_LM_DIR . 'includes/enqueue.php';
 
 register_activation_hook( __FILE__, function() {
 	bandit_lm_register_cpt();
+	bandit_lm_register_map_cpt();
 	bandit_lm_register_category_taxonomy();
 	bandit_lm_seed_default_categories();
 	flush_rewrite_rules();

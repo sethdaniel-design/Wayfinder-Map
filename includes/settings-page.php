@@ -25,20 +25,14 @@ function bandit_lm_register_settings() {
 }
 
 function bandit_lm_sanitize_settings( $input ) {
-	$out                   = array();
-	$out['map_image_id']   = isset( $input['map_image_id'] ) ? (int) $input['map_image_id'] : 0;
-	$out['hotel_x']        = isset( $input['hotel_x'] ) ? max( 0, min( 100, floatval( $input['hotel_x'] ) ) ) : 50.0;
-	$out['hotel_y']        = isset( $input['hotel_y'] ) ? max( 0, min( 100, floatval( $input['hotel_y'] ) ) ) : 50.0;
-	$out['hotel_label']    = isset( $input['hotel_label'] ) ? sanitize_text_field( $input['hotel_label'] ) : 'Your Location';
-	$out['hotel_sublabel'] = isset( $input['hotel_sublabel'] ) ? sanitize_text_field( $input['hotel_sublabel'] ) : '';
-	$out['hotel_color']    = isset( $input['hotel_color'] ) ? ( sanitize_hex_color( $input['hotel_color'] ) ?: '#CA5A35' ) : '#CA5A35';
-	$out['show_compass']   = ! empty( $input['show_compass'] ) ? 1 : 0;
-	$out['show_scale']     = ! empty( $input['show_scale'] ) ? 1 : 0;
-	$out['show_legend']    = ! empty( $input['show_legend'] ) ? 1 : 0;
-	$out['show_hotel_pin'] = ! empty( $input['show_hotel_pin'] ) ? 1 : 0;
-	$out['pin_size']       = isset( $input['pin_size'] ) ? max( 40, min( 300, (int) $input['pin_size'] ) ) : 100;
-	$out['show_pulse']     = ! empty( $input['show_pulse'] ) ? 1 : 0;
-	$out['map_page_url']   = isset( $input['map_page_url'] ) ? esc_url_raw( trim( $input['map_page_url'] ) ) : '';
+	// Start from the existing option so per-map fields that are no longer shown on
+	// this page (map image, hotel pin, display toggles) are preserved, not wiped.
+	$out = get_option( 'bandit_lm_settings', array() );
+	if ( ! is_array( $out ) ) { $out = array(); }
+
+	$out['pin_size']     = isset( $input['pin_size'] ) ? max( 40, min( 300, (int) $input['pin_size'] ) ) : 100;
+	$out['show_pulse']   = ! empty( $input['show_pulse'] ) ? 1 : 0;
+	$out['map_page_url'] = isset( $input['map_page_url'] ) ? esc_url_raw( trim( $input['map_page_url'] ) ) : '';
 
 	// Appearance — colors (blank = inherit) and per-role font source/family.
 	foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {
@@ -66,69 +60,10 @@ function bandit_lm_render_settings_page() {
 		<form method="post" action="options.php">
 			<?php settings_fields( 'bandit_lm_settings_group' ); ?>
 
-			<h2><?php esc_html_e( 'Map Background', 'bandit-locations-map' ); ?></h2>
-			<table class="form-table">
-				<tr>
-					<th><label><?php esc_html_e( 'Map Image', 'bandit-locations-map' ); ?></label></th>
-					<td>
-						<input type="hidden" id="bandit_map_image_id" name="bandit_lm_settings[map_image_id]" value="<?php echo esc_attr( $s['map_image_id'] ); ?>" />
-						<div id="bandit_map_image_preview" style="margin-bottom:8px;">
-							<?php if ( $s['map_image_url'] ) : ?>
-								<img src="<?php echo esc_url( $s['map_image_url'] ); ?>" style="max-width:520px;height:auto;border:1px solid #ddd;display:block;" />
-							<?php else : ?>
-								<em><?php esc_html_e( 'No image set. Pin placement will fall back to a blank canvas.', 'bandit-locations-map' ); ?></em>
-							<?php endif; ?>
-						</div>
-						<button type="button" class="button" id="bandit_map_image_pick"><?php esc_html_e( 'Choose / Replace Image', 'bandit-locations-map' ); ?></button>
-						<button type="button" class="button-link" id="bandit_map_image_clear" style="color:#a00;margin-left:8px;"><?php esc_html_e( 'Remove', 'bandit-locations-map' ); ?></button>
-						<p class="description">
-							<?php esc_html_e( 'Any aspect ratio works — illustrated, top-down, or perspective. Recommended: at least 2000px wide for sharpness on desktop.', 'bandit-locations-map' ); ?>
-						</p>
-					</td>
-				</tr>
-			</table>
 
-			<h2><?php esc_html_e( 'Hotel Pin (Your Location)', 'bandit-locations-map' ); ?></h2>
-			<table class="form-table">
-				<tr>
-					<th><?php esc_html_e( 'Show hotel pin on map', 'bandit-locations-map' ); ?></th>
-					<td><label><input type="checkbox" name="bandit_lm_settings[show_hotel_pin]" value="1" <?php checked( $s['show_hotel_pin'], 1 ); ?> /> <?php esc_html_e( 'Display "You Are Here" marker', 'bandit-locations-map' ); ?></label></td>
-				</tr>
-				<tr>
-					<th><label><?php esc_html_e( 'Position', 'bandit-locations-map' ); ?></label></th>
-					<td>
-						<div id="bandit-lm-hotel-placer"
-							data-map-url="<?php echo esc_attr( $s['map_image_url'] ); ?>"
-							data-hotel-x="<?php echo esc_attr( $s['hotel_x'] ); ?>"
-							data-hotel-y="<?php echo esc_attr( $s['hotel_y'] ); ?>"
-							data-hotel-color="<?php echo esc_attr( $s['hotel_color'] ); ?>"
-						></div>
-						<p style="margin-top:8px;">
-							<label>X: <input type="number" step="0.1" min="0" max="100" id="bandit_hotel_x" name="bandit_lm_settings[hotel_x]" value="<?php echo esc_attr( $s['hotel_x'] ); ?>" class="small-text" /></label>
-							&nbsp;&nbsp;
-							<label>Y: <input type="number" step="0.1" min="0" max="100" id="bandit_hotel_y" name="bandit_lm_settings[hotel_y]" value="<?php echo esc_attr( $s['hotel_y'] ); ?>" class="small-text" /></label>
-						</p>
-					</td>
-				</tr>
-				<tr>
-					<th><label for="bandit_hotel_label"><?php esc_html_e( 'Label', 'bandit-locations-map' ); ?></label></th>
-					<td><input type="text" id="bandit_hotel_label" name="bandit_lm_settings[hotel_label]" value="<?php echo esc_attr( $s['hotel_label'] ); ?>" class="regular-text" /></td>
-				</tr>
-				<tr>
-					<th><label for="bandit_hotel_sublabel"><?php esc_html_e( 'Sub-label', 'bandit-locations-map' ); ?></label></th>
-					<td>
-						<input type="text" id="bandit_hotel_sublabel" name="bandit_lm_settings[hotel_sublabel]" value="<?php echo esc_attr( $s['hotel_sublabel'] ); ?>" class="regular-text" />
-						<p class="description"><?php esc_html_e( 'Shown under the label. Leave blank to hide.', 'bandit-locations-map' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th><label for="bandit_hotel_color"><?php esc_html_e( 'Hotel Pin Color', 'bandit-locations-map' ); ?></label></th>
-					<td>
-						<input type="text" id="bandit_hotel_color" name="bandit_lm_settings[hotel_color]" value="<?php echo esc_attr( $s['hotel_color'] ); ?>" />
-						<input type="color" value="<?php echo esc_attr( $s['hotel_color'] ); ?>" onchange="document.getElementById('bandit_hotel_color').value=this.value" style="vertical-align:middle;margin-left:8px;" />
-					</td>
-				</tr>
-			</table>
+			<p class="description" style="max-width:820px;margin-top:4px;">
+				<?php esc_html_e( 'Each map’s background image, hotel pin, and display toggles are set on the map itself (Wayfinder Map → Maps). The settings below are shared across all maps.', 'bandit-locations-map' ); ?>
+			</p>
 
 			<h2><?php esc_html_e( 'Map Markers', 'bandit-locations-map' ); ?></h2>
 			<table class="form-table">

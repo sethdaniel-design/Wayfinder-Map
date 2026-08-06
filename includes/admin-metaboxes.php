@@ -9,7 +9,7 @@ add_action( 'add_meta_boxes_bandit_map_point', 'bandit_lm_add_metaboxes' );
 function bandit_lm_add_metaboxes() {
 	add_meta_box(
 		'bandit_lm_placement',
-		__( 'Pin Placement', 'bandit-locations-map' ),
+		__( 'Maps & Positions', 'bandit-locations-map' ),
 		'bandit_lm_render_placement_box',
 		'bandit_map_point',
 		'normal',
@@ -28,37 +28,57 @@ function bandit_lm_add_metaboxes() {
 function bandit_lm_render_placement_box( $post ) {
 	try {
 		wp_nonce_field( 'bandit_lm_save_meta', 'bandit_lm_meta_nonce' );
-		$x = get_post_meta( $post->ID, 'bandit_x', true );
-		$y = get_post_meta( $post->ID, 'bandit_y', true );
-		if ( $x === '' || $x === null || $x === false ) { $x = 50; }
-		if ( $y === '' || $y === null || $y === false ) { $y = 50; }
-		$settings = bandit_lm_get_settings();
-	?>
-	<p class="description" style="margin:0 0 12px;">
-		<?php esc_html_e( 'Click on the map to place this pin. You can also drag the pin to fine-tune. The X/Y values below update automatically.', 'bandit-locations-map' ); ?>
-	</p>
+		$maps = get_posts( array(
+			'post_type'      => 'bandit_map',
+			'posts_per_page' => -1,
+			'orderby'        => array( 'menu_order' => 'ASC', 'title' => 'ASC' ),
+			'post_status'    => 'publish',
+		) );
+		$positions = bandit_lm_get_pin_positions( $post->ID );
 
-	<div id="bandit-lm-placer"
-		data-map-url="<?php echo esc_attr( $settings['map_image_url'] ); ?>"
-		data-x="<?php echo esc_attr( $x ); ?>"
-		data-y="<?php echo esc_attr( $y ); ?>"
-		data-hotel-x="<?php echo esc_attr( $settings['hotel_x'] ); ?>"
-		data-hotel-y="<?php echo esc_attr( $settings['hotel_y'] ); ?>"
-		data-hotel-color="<?php echo esc_attr( $settings['hotel_color'] ); ?>"
-		data-show-hotel="<?php echo (int) $settings['show_hotel_pin']; ?>"
-	></div>
-
-	<table class="form-table" style="margin-top:12px;">
-		<tr>
-			<th><label for="bandit_x"><?php esc_html_e( 'X (%)', 'bandit-locations-map' ); ?></label></th>
-			<td><input type="number" step="0.1" min="0" max="100" id="bandit_x" name="bandit_x" value="<?php echo esc_attr( $x ); ?>" class="small-text" /></td>
-			<th><label for="bandit_y"><?php esc_html_e( 'Y (%)', 'bandit-locations-map' ); ?></label></th>
-			<td><input type="number" step="0.1" min="0" max="100" id="bandit_y" name="bandit_y" value="<?php echo esc_attr( $y ); ?>" class="small-text" /></td>
-		</tr>
-	</table>
-	<?php
+		if ( empty( $maps ) ) {
+			echo '<p class="description">' . esc_html__( 'No maps yet. Create one under Wayfinder Map → Add Map, then come back here to place this pin.', 'bandit-locations-map' ) . '</p>';
+			return;
+		}
+		?>
+		<p class="description" style="margin:0 0 12px;">
+			<?php esc_html_e( 'Tick each map this location should appear on, then click the map to place the pin (or drag it). A location can appear on several maps, each with its own position.', 'bandit-locations-map' ); ?>
+		</p>
+		<?php foreach ( $maps as $m ) :
+			$ms  = bandit_lm_get_map_settings( $m->ID );
+			$on  = isset( $positions[ $m->ID ] );
+			$x   = $on ? $positions[ $m->ID ]['x'] : 50;
+			$y   = $on ? $positions[ $m->ID ]['y'] : 50;
+			$blk = 'blm-mappos-' . (int) $m->ID;
+		?>
+		<div class="blm-mappos" style="margin:0 0 14px;border:1px solid #e0d6c2;border-radius:4px;">
+			<label style="display:block;padding:10px 12px;font-weight:600;background:#f6f1e7;cursor:pointer;">
+				<input type="checkbox" class="blm-map-toggle" name="bandit_map_pos[<?php echo (int) $m->ID; ?>][on]" value="1" <?php checked( $on ); ?> data-target="<?php echo esc_attr( $blk ); ?>" />
+				<?php echo esc_html( get_the_title( $m ) ); ?>
+			</label>
+			<div id="<?php echo esc_attr( $blk ); ?>" class="blm-mappos-body" style="padding:12px;<?php echo $on ? '' : 'display:none;'; ?>">
+				<?php if ( $ms['map_image_url'] ) : ?>
+					<div class="blm-multi-placer"
+						data-map-url="<?php echo esc_attr( $ms['map_image_url'] ); ?>"
+						data-x="<?php echo esc_attr( $x ); ?>"
+						data-y="<?php echo esc_attr( $y ); ?>"
+						data-x-input="bandit_pos_x_<?php echo (int) $m->ID; ?>"
+						data-y-input="bandit_pos_y_<?php echo (int) $m->ID; ?>"
+					></div>
+				<?php else : ?>
+					<p class="description"><?php esc_html_e( 'This map has no background image yet. Add one to the map first.', 'bandit-locations-map' ); ?></p>
+				<?php endif; ?>
+				<p style="margin-top:8px;">
+					<label>X: <input type="number" step="0.1" min="0" max="100" id="bandit_pos_x_<?php echo (int) $m->ID; ?>" name="bandit_map_pos[<?php echo (int) $m->ID; ?>][x]" value="<?php echo esc_attr( $x ); ?>" class="small-text" /></label>
+					&nbsp;&nbsp;
+					<label>Y: <input type="number" step="0.1" min="0" max="100" id="bandit_pos_y_<?php echo (int) $m->ID; ?>" name="bandit_map_pos[<?php echo (int) $m->ID; ?>][y]" value="<?php echo esc_attr( $y ); ?>" class="small-text" /></label>
+				</p>
+			</div>
+		</div>
+		<?php endforeach; ?>
+		<?php
 	} catch ( \Throwable $e ) {
-		echo '<p style="color:#a00;"><strong>Pin placement tool failed to load.</strong> Error logged to debug.log: ' . esc_html( $e->getMessage() ) . '</p>';
+		echo '<p style="color:#a00;"><strong>Pin placement failed to load.</strong> ' . esc_html( $e->getMessage() ) . '</p>';
 		if ( function_exists( 'bandit_lm_log' ) ) {
 			bandit_lm_log( 'render_placement_box failed: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine() );
 		}
@@ -147,15 +167,17 @@ function bandit_lm_save_meta( $post_id, $post ) {
 		if ( ! wp_verify_nonce( $nonce, 'bandit_lm_save_meta' ) ) { return; }
 		if ( ! current_user_can( 'edit_post', $post_id ) ) { return; }
 
-		// Numeric fields
-		$numeric = array( 'bandit_x', 'bandit_y' );
-		foreach ( $numeric as $k ) {
-			if ( isset( $_POST[ $k ] ) ) {
-				$raw = is_scalar( $_POST[ $k ] ) ? (string) $_POST[ $k ] : '';
-				$v = (float) $raw;
-				$v = max( 0.0, min( 100.0, $v ) );
-				update_post_meta( $post_id, $k, $v );
+		// Per-map positions: which maps this pin appears on, and where on each.
+		if ( isset( $_POST['bandit_map_pos'] ) && is_array( $_POST['bandit_map_pos'] ) ) {
+			$positions = array();
+			foreach ( $_POST['bandit_map_pos'] as $mid => $data ) {
+				$mid = (int) $mid;
+				if ( ! $mid || empty( $data['on'] ) ) { continue; }
+				$px = isset( $data['x'] ) ? max( 0.0, min( 100.0, (float) $data['x'] ) ) : 50.0;
+				$py = isset( $data['y'] ) ? max( 0.0, min( 100.0, (float) $data['y'] ) ) : 50.0;
+				$positions[ $mid ] = array( 'x' => $px, 'y' => $py );
 			}
+			update_post_meta( $post_id, 'bandit_map_positions', $positions );
 		}
 
 		// Text fields

@@ -162,6 +162,29 @@
 .blm-chip:hover { color: var(--blm-map-text); }
 .blm-chip.is-active { color: var(--blm-white); }
 
+/* Map switcher */
+.blm-switcher {
+	position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 7;
+	display: flex; gap: 2px; flex-wrap: wrap; justify-content: center;
+	background: rgba(28,25,23,0.72); padding: 3px;
+	border: 1px solid rgba(171,121,43,0.4);
+	backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+	max-width: calc(100% - 32px);
+}
+.blm-switch-btn {
+	background: transparent; color: var(--blm-map-text);
+	border: none; cursor: pointer;
+	font-family: var(--blm-font-body); font-weight: 700;
+	font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+	padding: 7px 13px; transition: background 150ms, color 150ms;
+}
+.blm-switch-btn:hover { color: var(--blm-white); }
+.blm-switch-btn.is-active { background: var(--blm-primary); color: var(--blm-white); }
+@media (max-width: 720px) {
+	.blm-switcher { top: 12px; }
+	.blm-switch-btn { padding: 6px 9px; font-size: 9px; letter-spacing: 0.1em; }
+}
+
 /* HUD top-right */
 .blm-hud-tr {
 	position: absolute; top: 16px; right: 16px; z-index: 5;

@@ -159,6 +159,26 @@
 			});
 		}
 
+		// Pin editor: one placer per map ("Maps & Positions").
+		var multi = document.querySelectorAll('.blm-multi-placer');
+		for (var i = 0; i < multi.length; i++) {
+			buildPlacer(multi[i], {
+				xInputId: multi[i].getAttribute('data-x-input'),
+				yInputId: multi[i].getAttribute('data-y-input'),
+				placingHotel: false
+			});
+		}
+		// Show/hide each map's placer block with its checkbox.
+		var toggles = document.querySelectorAll('.blm-map-toggle');
+		for (var t = 0; t < toggles.length; t++) {
+			(function (cb) {
+				cb.addEventListener('change', function () {
+					var target = document.getElementById(cb.getAttribute('data-target'));
+					if (target) { target.style.display = cb.checked ? '' : 'none'; }
+				});
+			})(toggles[t]);
+		}
+
 		// Settings page: Choose Image media picker
 		var pickBtn = document.getElementById('bandit_map_image_pick');
 		if (pickBtn && typeof wp !== 'undefined' && wp.media) {

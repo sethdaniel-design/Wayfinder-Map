@@ -20,6 +20,7 @@ function bandit_lm_shortcode_map( $atts ) {
 		'height'   => '720',
 		'filter'   => 'All',
 		'active'   => '',
+		'map'      => '',
 		'show_filters' => '1',
 	), $atts, 'bandit_locations_map' );
 
@@ -32,6 +33,7 @@ function bandit_lm_shortcode_map( $atts ) {
 		data-height="<?php echo esc_attr( $atts['height'] ); ?>"
 		data-filter="<?php echo esc_attr( $atts['filter'] ); ?>"
 		data-active="<?php echo esc_attr( $atts['active'] ); ?>"
+		data-map="<?php echo esc_attr( $atts['map'] ); ?>"
 		data-show-filters="<?php echo esc_attr( $atts['show_filters'] ); ?>">
 		<div class="bandit-lm-loading"><span></span><span></span><span></span></div>
 	</div>

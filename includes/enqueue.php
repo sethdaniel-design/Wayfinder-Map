@@ -24,10 +24,37 @@ function bandit_lm_enqueue_frontend() {
 		true
 	);
 
+	$maps = bandit_lm_get_all_maps();
+	if ( empty( $maps ) ) {
+		// Fallback (pre-migration / fresh install): one synthetic map from the
+		// global settings + all pins, so the frontend always has at least one map.
+		$g    = bandit_lm_get_settings();
+		$maps = array( array(
+			'id'       => 0,
+			'slug'     => 'map',
+			'name'     => __( 'Map', 'bandit-locations-map' ),
+			'settings' => array(
+				'map_image_id'   => $g['map_image_id'],
+				'map_image_url'  => $g['map_image_url'],
+				'hotel_x'        => $g['hotel_x'],
+				'hotel_y'        => $g['hotel_y'],
+				'hotel_label'    => $g['hotel_label'],
+				'hotel_sublabel' => $g['hotel_sublabel'],
+				'hotel_color'    => $g['hotel_color'],
+				'show_hotel_pin' => $g['show_hotel_pin'],
+				'show_compass'   => $g['show_compass'],
+				'show_scale'     => $g['show_scale'],
+				'show_legend'    => $g['show_legend'],
+			),
+			'pins'     => bandit_lm_get_all_points(),
+		) );
+	}
+
 	wp_localize_script( 'bandit-lm-frontend', 'BanditLocationsData', array(
-		'pins'       => bandit_lm_get_all_points(),
+		'maps'       => $maps,
+		'pins'       => bandit_lm_get_all_points(), // flat list for the [wayfinder_list] table
 		'categories' => bandit_lm_get_categories(),
-		'settings'   => bandit_lm_get_settings(),
+		'settings'   => bandit_lm_get_settings(),    // global appearance / markers
 	) );
 
 	// Appearance: load any Google Fonts and inject --blm-* color/font overrides.
@@ -93,8 +120,14 @@ add_action( 'admin_enqueue_scripts', 'bandit_lm_enqueue_admin' );
 function bandit_lm_enqueue_admin( $hook ) {
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 	$is_pin_editor = $screen && $screen->post_type === 'bandit_map_point';
+	$is_map_editor = $screen && $screen->post_type === 'bandit_map';
 	$is_settings   = isset( $_GET['page'] ) && $_GET['page'] === 'bandit-lm-settings';
-	if ( ! $is_pin_editor && ! $is_settings ) { return; }
+	if ( ! $is_pin_editor && ! $is_map_editor && ! $is_settings ) { return; }
+
+	// The map editor and pin editor use the media picker for images.
+	if ( $is_map_editor || $is_pin_editor ) {
+		wp_enqueue_media();
+	}
 
 	wp_enqueue_style( 'wp-color-picker' );
 	wp_enqueue_style(

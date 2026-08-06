@@ -4,7 +4,7 @@ Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        1.7.1
+Stable tag:        2.0.0
 License:           GPL-2.0-or-later
 
 Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
@@ -25,10 +25,11 @@ A self-contained plugin for any Locations page (or anywhere you need an editable
 
 1. Upload `wayfinder-map.zip` via Plugins → Add New → Upload Plugin
 2. Activate
-3. Go to **Wayfinder Map → Map Settings** to upload your map image and place the hotel pin
+3. Create a map at **Wayfinder Map → Add Map** — upload its background image and place its hotel pin
 4. Add categories at **Wayfinder Map → Pin Categories** (a few defaults are seeded for you)
-5. Add pins at **Wayfinder Map → Add Map Point**
-6. Drop the shortcode into any page or Divi module:
+5. Add pins at **Wayfinder Map → Add Map Point**, ticking each map the location appears on and placing it
+6. Set shared colors/fonts under **Wayfinder Map → Map Settings**
+7. Drop the shortcode into any page or Divi module:
    * `[wayfinder_map]` — the interactive map with side drawer
    * `[wayfinder_list]` — the full sortable list table
    * `[wayfinder_full]` — both, stacked
@@ -68,6 +69,13 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 2.0.0 =
+* **Multiple maps.** Create any number of maps (Wayfinder Map → Maps), each with its own background image, hotel pin, and display toggles. A switcher bar above the map lets visitors flip between them instantly.
+* Locations can appear on **several maps at once**, each with its own position — set under "Maps & Positions" in the pin editor.
+* Colors, fonts, and marker size are shared across all maps (Map Settings); image / hotel pin / toggles are per-map.
+* New `map="slug"` attribute on `[wayfinder_map]` to embed one specific map (no switcher).
+* Automatic, one-time migration wraps your existing map into "Map 1" and assigns all current pins to it — nothing to redo.
 
 = 1.7.1 =
 * Deep-link buttons now re-open and re-scroll to their location every time they're clicked — previously a second click did nothing if you were already on that link's hash.

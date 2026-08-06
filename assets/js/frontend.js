@@ -74,17 +74,34 @@
 		root.innerHTML = '';
 		root.classList.add('bandit-lm-rendered');
 
+		var MAPS = DATA.maps || [];
+		var GLOBAL = DATA.settings || {};
+		// Which maps this instance shows: a specific one via data-map, else all.
+		var mapList = MAPS;
+		if (root.dataset.map) {
+			var only = MAPS.filter(function (m) { return m.slug === root.dataset.map || String(m.id) === root.dataset.map; });
+			if (only.length) mapList = only;
+		}
+		if (!mapList.length) { return; }
+
 		var height = parseInt(root.dataset.height || '720', 10);
 		var showFilters = root.dataset.showFilters !== '0';
-		var activeId = root.dataset.active ? parseInt(root.dataset.active, 10) : (PINS[0] ? PINS[0].id : null);
-		var hoverId = null;
-		var filter = root.dataset.filter || 'All';
+
+		var mi = 0;            // current map index into mapList
+		var SETTINGS = {};     // current map settings (merged with global)
+		var PINS = [];         // current map's pins
+		var activeId = null, hoverId = null, filter = 'All';
 
 		// Pan / zoom state (translation in container pixels, scale multiplier)
 		var tx = 0, ty = 0, scale = 1;
 		var MIN_SCALE = 1;
 		var MAX_SCALE = 5;
 
+		function applyCurrentMap() {
+			var m = mapList[mi] || {};
+			SETTINGS = Object.assign({}, GLOBAL, m.settings || {});
+			PINS = m.pins || [];
+		}
 		function visible() { return filter === 'All' ? PINS : PINS.filter(function (p) { return p.category === filter; }); }
 		function getActive() {
 			var v = visible();
@@ -92,47 +109,32 @@
 			return found || v[0] || PINS[0] || null;
 		}
 
-		// ----- Layout shell -----
+		// ----- Persistent shell (built once; per-map content is (re)built by loadMap) -----
 		var stage = el('div', { className: 'blm-stage', style: { minHeight: height + 'px' } });
 		var mapPanel = el('div', { className: 'blm-map-panel', style: { minHeight: height + 'px' } });
-		var canvas = el('div', { className: 'blm-map-canvas' });
 		var drawer = el('aside', { className: 'blm-drawer' });
-
-		mapPanel.appendChild(canvas);
 		stage.appendChild(mapPanel);
 		stage.appendChild(drawer);
 		root.appendChild(stage);
 
-		// Persistent HUD elements (built once, never re-rendered so animations don't restart)
+		// Map switcher (only shown when there is more than one map)
+		var switcher = null;
+		if (mapList.length > 1) {
+			switcher = el('div', { className: 'blm-switcher' });
+			mapPanel.appendChild(switcher);
+		}
+
 		var chipRow = showFilters ? el('div', { className: 'blm-chiprow' }) : null;
 		if (chipRow) mapPanel.appendChild(chipRow);
 
 		var hudTR = el('div', { className: 'blm-hud-tr' });
 		mapPanel.appendChild(hudTR);
 
-		var legend = null;
-		if (SETTINGS.show_legend && CATS.length) {
-			legend = el('div', { className: 'blm-legend' });
-			CATS.forEach(function (c) {
-				legend.appendChild(el('div', { className: 'blm-legend-row' }, [
-					el('span', { className: 'blm-legend-dot', style: { background: c.color } }),
-					el('span', { className: 'blm-legend-label' }, [c.name])
-				]));
-			});
-			mapPanel.appendChild(legend);
-		}
+		// Per-map elements — reassigned by loadMap().
+		var canvas = null, bgImg = null, pinSvg = null, legend = null, compassEl = null;
+		var imgNaturalW = 0, imgNaturalH = 0, vbHeight = 100;
 
-		if (SETTINGS.show_compass) {
-			mapPanel.appendChild(el('div', { className: 'blm-compass' }, [
-				el('span', { className: 'blm-compass-n' }, ['N']),
-				el('span', { className: 'blm-compass-s' }, ['S']),
-				el('span', { className: 'blm-compass-w' }, ['W']),
-				el('span', { className: 'blm-compass-e' }, ['E']),
-				el('div', { className: 'blm-compass-needle' })
-			]));
-		}
-
-		// Zoom controls overlay
+		// Zoom controls overlay (persistent)
 		var zoomCtrls = el('div', { className: 'blm-zoom-ctrls' }, [
 			el('button', { type: 'button', className: 'blm-zoom-btn', 'aria-label': 'Zoom in', onClick: function () { setScale(scale * 1.25); } }, ['+']),
 			el('button', { type: 'button', className: 'blm-zoom-btn', 'aria-label': 'Zoom out', onClick: function () { setScale(scale / 1.25); } }, ['−']),
@@ -188,23 +190,7 @@
 		function fsEsc(e) { if ((e.key === 'Escape' || e.keyCode === 27) && fsActive()) exitFs(); }
 		function toggleFs() { fsActive() ? exitFs() : enterFs(); }
 
-		// Canvas children
-		var bgImg = null;
-		if (SETTINGS.map_image_url) {
-			bgImg = el('img', { className: 'blm-map-bg', src: SETTINGS.map_image_url, alt: '', draggable: 'false' });
-			canvas.appendChild(bgImg);
-		} else {
-			canvas.appendChild(el('div', { className: 'blm-map-fallback' }, [
-				el('span', { className: 'blm-map-fallback-label' }, ['MAP — UPLOAD AN IMAGE IN SETTINGS'])
-			]));
-		}
-
-		var pinSvg = svg('svg', { class: 'blm-pin-layer', viewBox: '0 0 100 100', preserveAspectRatio: 'none' });
-		canvas.appendChild(pinSvg);
-
-		// ----- Pin interactions: event delegation on the SVG (survives all paint() rebuilds).
-		// More robust than per-pin listeners which can be defeated by third-party scripts
-		// or by the painting tree being rebuilt under an in-flight click sequence.
+		// ----- Pin interaction delegation (re-attached to each map's fresh SVG) -----
 		function pinIdFromTarget(target) {
 			if (!target || !target.closest) return null;
 			var g = target.closest('.blm-pin');
@@ -212,47 +198,45 @@
 			var id = parseInt(g.getAttribute('data-pin-id'), 10);
 			return isNaN(id) ? null : id;
 		}
-		pinSvg.addEventListener('mousedown', function (e) {
-			if (pinIdFromTarget(e.target) !== null) e.stopPropagation();
-		});
-		pinSvg.addEventListener('touchstart', function (e) {
-			if (pinIdFromTarget(e.target) !== null) e.stopPropagation();
-		}, { passive: true });
-		pinSvg.addEventListener('click', function (e) {
-			var id = pinIdFromTarget(e.target);
-			if (id === null) return;
-			activeId = id;
-			paint();
-		});
-		pinSvg.addEventListener('mouseover', function (e) {
-			var id = pinIdFromTarget(e.target);
-			if (id === null) return;
-			if (hoverId !== id) { hoverId = id; paint(); }
-		});
-		pinSvg.addEventListener('mouseout', function (e) {
-			if (!e.target || !e.target.closest) return;
-			var g = e.target.closest('.blm-pin');
-			if (!g) return;
-			// Don't fire when moving between children of the same pin
-			if (e.relatedTarget && g.contains && g.contains(e.relatedTarget)) return;
-			if (hoverId !== null) { hoverId = null; paint(); }
-		});
+		function attachPinListeners(svgEl) {
+			svgEl.addEventListener('mousedown', function (e) {
+				if (pinIdFromTarget(e.target) !== null) e.stopPropagation();
+			});
+			svgEl.addEventListener('touchstart', function (e) {
+				if (pinIdFromTarget(e.target) !== null) e.stopPropagation();
+			}, { passive: true });
+			svgEl.addEventListener('click', function (e) {
+				var id = pinIdFromTarget(e.target);
+				if (id === null) return;
+				activeId = id;
+				paint();
+			});
+			svgEl.addEventListener('mouseover', function (e) {
+				var id = pinIdFromTarget(e.target);
+				if (id === null) return;
+				if (hoverId !== id) { hoverId = id; paint(); }
+			});
+			svgEl.addEventListener('mouseout', function (e) {
+				if (!e.target || !e.target.closest) return;
+				var g = e.target.closest('.blm-pin');
+				if (!g) return;
+				if (e.relatedTarget && g.contains && g.contains(e.relatedTarget)) return;
+				if (hoverId !== null) { hoverId = null; paint(); }
+			});
+		}
 
-		// Aspect-corrected coordinate space. Stored x/y are 0..100 (percent of image).
-		// SVG viewBox is updated to match image aspect so 1 unit in X = 1 unit in Y in pixels
-		// — keeps pins perfectly round on any image shape.
-		var vbHeight = 100; // updated once image loads
+		// Aspect-corrected coordinate space. Stored x/y are 0..100 (percent of image);
+		// the SVG viewBox matches the image aspect so 1 unit X = 1 unit Y in pixels.
 		function my(y) { return (parseFloat(y) || 0) * vbHeight / 100; }
 		function updateViewBox() {
-			if (imgNaturalW && imgNaturalH) {
+			if (imgNaturalW && imgNaturalH && pinSvg) {
 				vbHeight = 100 * (imgNaturalH / imgNaturalW);
 				pinSvg.setAttribute('viewBox', '0 0 100 ' + vbHeight);
 			}
 		}
-
 		// ----- Fit-to-panel logic (preserve image aspect, no crop) -----
-		var imgNaturalW = 0, imgNaturalH = 0;
 		function fitCanvas() {
+			if (!canvas) return;
 			var panelRect = mapPanel.getBoundingClientRect();
 			if (!panelRect.width || !panelRect.height) return;
 			var pw = panelRect.width, ph = panelRect.height;
@@ -264,29 +248,17 @@
 			canvas.style.width = w + 'px';
 			canvas.style.height = h + 'px';
 		}
-		if (bgImg) {
-			if (bgImg.complete && bgImg.naturalWidth) {
-				imgNaturalW = bgImg.naturalWidth; imgNaturalH = bgImg.naturalHeight;
-				updateViewBox(); fitCanvas(); paint();
-			} else {
-				bgImg.addEventListener('load', function () {
-					imgNaturalW = bgImg.naturalWidth; imgNaturalH = bgImg.naturalHeight;
-					updateViewBox(); fitCanvas(); paint();
-				});
-			}
-		}
 		var ro = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(fitCanvas) : null;
 		if (ro) ro.observe(mapPanel);
 		window.addEventListener('resize', fitCanvas);
-		// Initial fit
-		setTimeout(fitCanvas, 0);
 
 		// ----- Pan & zoom transform -----
 		function applyTransform() {
-			canvas.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+			if (canvas) canvas.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
 			zoomCtrls.classList.toggle('is-zoomed', scale > 1.01 || Math.abs(tx) > 1 || Math.abs(ty) > 1);
 		}
 		function constrain() {
+			if (!canvas) return;
 			var panelRect = mapPanel.getBoundingClientRect();
 			var canvasW = canvas.offsetWidth * scale;
 			var canvasH = canvas.offsetHeight * scale;
@@ -548,20 +520,116 @@
 			}
 		}
 
-		paint();
-		applyTransform();
+		// ----- Switcher + per-map loader -----
+		function renderSwitcher() {
+			if (!switcher) return;
+			switcher.innerHTML = '';
+			mapList.forEach(function (m, i) {
+				switcher.appendChild(el('button', {
+					type: 'button',
+					className: 'blm-switch-btn' + (i === mi ? ' is-active' : ''),
+					onClick: function () { if (i !== mi) loadMap(i); }
+				}, [m.name || ('Map ' + (i + 1))]));
+			});
+		}
 
-		// External event hook (used by list rows and deep links)
-		root.addEventListener('bandit-lm:setActive', function (e) {
-			if (e.detail && typeof e.detail.id !== 'undefined') {
-				activeId = e.detail.id;
-				// Ensure the target pin is visible under the current filter.
-				var tp = PINS.filter(function (x) { return x.id === activeId; })[0];
-				if (tp && filter !== 'All' && tp.category !== filter) { filter = 'All'; }
-				paint();
-				if (e.detail.scroll !== false) {
-					root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		function loadMap(index) {
+			mi = index;
+			applyCurrentMap();
+			filter = 'All'; hoverId = null;
+			tx = 0; ty = 0; scale = 1;
+			imgNaturalW = 0; imgNaturalH = 0; vbHeight = 100;
+			activeId = PINS[0] ? PINS[0].id : null;
+
+			// Tear down the previous map's content.
+			if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+			if (legend && legend.parentNode) legend.parentNode.removeChild(legend);
+			if (compassEl && compassEl.parentNode) compassEl.parentNode.removeChild(compassEl);
+			legend = null; compassEl = null;
+
+			// Fresh canvas + image + pin layer for this map.
+			canvas = el('div', { className: 'blm-map-canvas' });
+			bgImg = null;
+			if (SETTINGS.map_image_url) {
+				bgImg = el('img', { className: 'blm-map-bg', src: SETTINGS.map_image_url, alt: '', draggable: 'false' });
+				canvas.appendChild(bgImg);
+			} else {
+				canvas.appendChild(el('div', { className: 'blm-map-fallback' }, [
+					el('span', { className: 'blm-map-fallback-label' }, ['MAP — NO IMAGE SET'])
+				]));
+			}
+			pinSvg = svg('svg', { class: 'blm-pin-layer', viewBox: '0 0 100 100', preserveAspectRatio: 'none' });
+			canvas.appendChild(pinSvg);
+			mapPanel.insertBefore(canvas, mapPanel.firstChild); // behind the absolute overlays
+			attachPinListeners(pinSvg);
+
+			// Per-map overlays.
+			if (SETTINGS.show_legend && CATS.length) {
+				legend = el('div', { className: 'blm-legend' });
+				CATS.forEach(function (c) {
+					legend.appendChild(el('div', { className: 'blm-legend-row' }, [
+						el('span', { className: 'blm-legend-dot', style: { background: c.color } }),
+						el('span', { className: 'blm-legend-label' }, [c.name])
+					]));
+				});
+				mapPanel.appendChild(legend);
+			}
+			if (SETTINGS.show_compass) {
+				compassEl = el('div', { className: 'blm-compass' }, [
+					el('span', { className: 'blm-compass-n' }, ['N']),
+					el('span', { className: 'blm-compass-s' }, ['S']),
+					el('span', { className: 'blm-compass-w' }, ['W']),
+					el('span', { className: 'blm-compass-e' }, ['E']),
+					el('div', { className: 'blm-compass-needle' })
+				]);
+				mapPanel.appendChild(compassEl);
+			}
+
+			if (bgImg) {
+				if (bgImg.complete && bgImg.naturalWidth) {
+					imgNaturalW = bgImg.naturalWidth; imgNaturalH = bgImg.naturalHeight; updateViewBox();
+				} else {
+					bgImg.addEventListener('load', function () {
+						imgNaturalW = bgImg.naturalWidth; imgNaturalH = bgImg.naturalHeight;
+						updateViewBox(); fitCanvas(); paint();
+					});
 				}
+			}
+
+			renderSwitcher();
+			applyTransform();
+			fitCanvas();
+			paint();
+			setTimeout(fitCanvas, 0);
+		}
+
+		loadMap(0);
+
+		// Preselect a pin via the shortcode's `active` attribute.
+		if (root.dataset.active) {
+			var aid0 = parseInt(root.dataset.active, 10);
+			if (!isNaN(aid0)) {
+				root.dispatchEvent(new CustomEvent('bandit-lm:setActive', { detail: { id: aid0, scroll: false } }));
+			}
+		}
+
+		// External event hook (list rows + deep links): switch to the map that
+		// contains the requested pin, then activate it.
+		root.addEventListener('bandit-lm:setActive', function (e) {
+			if (!e.detail || typeof e.detail.id === 'undefined') return;
+			var id = e.detail.id;
+			var targetMap = -1;
+			for (var i = 0; i < mapList.length; i++) {
+				if ((mapList[i].pins || []).filter(function (p) { return p.id === id; }).length > 0) { targetMap = i; break; }
+			}
+			if (targetMap === -1) return; // pin isn't on any map this instance shows
+			if (targetMap !== mi) { loadMap(targetMap); }
+			activeId = id;
+			var tp = PINS.filter(function (x) { return x.id === id; })[0];
+			if (tp && filter !== 'All' && tp.category !== filter) { filter = 'All'; }
+			paint();
+			if (e.detail.scroll !== false) {
+				root.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
 		});
 	}
