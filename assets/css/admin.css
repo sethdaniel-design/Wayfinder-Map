@@ -32,29 +32,16 @@
 }
 .blm-placer-pin {
 	position: absolute;
-	width: 28px; height: 28px;
-	transform: translate(-50%, -50%);
+	width: 26px; height: 34px;
+	transform: translate(-50%, -100%); /* teardrop tip sits on the point */
 	cursor: grab;
 	z-index: 4;
 }
 .blm-placer-pin.is-dragging { cursor: grabbing; }
-.blm-placer-pin-dot {
-	position: absolute; inset: 8px;
-	background: #CA5A35;
-	border: 2px solid #fcf8f2;
-	border-radius: 50%;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-}
-.blm-placer-pin-ring {
-	position: absolute; inset: 0;
-	border: 2px solid #CA5A35;
-	border-radius: 50%;
-	opacity: 0.4;
-	animation: blm-pin-pulse 2s infinite ease-in-out;
-}
-@keyframes blm-pin-pulse {
-	0%, 100% { transform: scale(1); opacity: 0.4; }
-	50% { transform: scale(1.4); opacity: 0; }
+.blm-placer-pin-svg {
+	width: 26px; height: 34px; display: block;
+	filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+	pointer-events: none;
 }
 .blm-placer-hotel {
 	position: absolute;

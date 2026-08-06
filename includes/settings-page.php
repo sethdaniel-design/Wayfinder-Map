@@ -36,6 +36,8 @@ function bandit_lm_sanitize_settings( $input ) {
 	$out['show_scale']     = ! empty( $input['show_scale'] ) ? 1 : 0;
 	$out['show_legend']    = ! empty( $input['show_legend'] ) ? 1 : 0;
 	$out['show_hotel_pin'] = ! empty( $input['show_hotel_pin'] ) ? 1 : 0;
+	$out['pin_size']       = isset( $input['pin_size'] ) ? max( 40, min( 300, (int) $input['pin_size'] ) ) : 100;
+	$out['show_pulse']     = ! empty( $input['show_pulse'] ) ? 1 : 0;
 
 	// Appearance — colors (blank = inherit) and per-role font source/family.
 	foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {
@@ -124,6 +126,21 @@ function bandit_lm_render_settings_page() {
 						<input type="text" id="bandit_hotel_color" name="bandit_lm_settings[hotel_color]" value="<?php echo esc_attr( $s['hotel_color'] ); ?>" />
 						<input type="color" value="<?php echo esc_attr( $s['hotel_color'] ); ?>" onchange="document.getElementById('bandit_hotel_color').value=this.value" style="vertical-align:middle;margin-left:8px;" />
 					</td>
+				</tr>
+			</table>
+
+			<h2><?php esc_html_e( 'Map Markers', 'bandit-locations-map' ); ?></h2>
+			<table class="form-table">
+				<tr>
+					<th><label for="bandit_pin_size"><?php esc_html_e( 'Pin size', 'bandit-locations-map' ); ?></label></th>
+					<td>
+						<input type="number" id="bandit_pin_size" name="bandit_lm_settings[pin_size]" value="<?php echo esc_attr( $s['pin_size'] ); ?>" min="40" max="300" step="10" class="small-text" /> %
+						<p class="description"><?php esc_html_e( 'Size of the location pin markers on the map (100% = default). Try 60–160.', 'bandit-locations-map' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Marker pulse', 'bandit-locations-map' ); ?></th>
+					<td><label><input type="checkbox" name="bandit_lm_settings[show_pulse]" value="1" <?php checked( $s['show_pulse'], 1 ); ?> /> <?php esc_html_e( 'Animate a pulse ring around the selected pin', 'bandit-locations-map' ); ?></label></td>
 				</tr>
 			</table>
 

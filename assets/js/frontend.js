@@ -389,12 +389,13 @@
 			}
 
 			// POI pins (teardrop markers — tip sits on the exact location)
+			var pinScale = (parseFloat(SETTINGS.pin_size) || 100) / 100;
 			visible().forEach(function (p) {
 				var isActive = actv && p.id === actv.id;
 				var isHover = hoverId === p.id;
 				var color = effColor(p);
 				var px = p.x, py = my(p.y);
-				var h = isActive ? 5.8 : (isHover ? 5.2 : 4.5); // marker height (tip -> top)
+				var h = (isActive ? 5.8 : (isHover ? 5.2 : 4.5)) * pinScale; // marker height (tip -> top)
 				var headR = h * 0.32;
 				var headCy = py - h + headR;                    // centre of the round head
 				var g = svg('g', {
@@ -405,7 +406,7 @@
 				// Transparent hit area over the whole marker
 				g.appendChild(svg('circle', { cx: px, cy: headCy, r: h * 0.72, fill: 'transparent' }));
 
-				if (isActive) {
+				if (isActive && SETTINGS.show_pulse) {
 					var pulse1 = svg('circle', {
 						cx: px, cy: headCy, r: 2, fill: 'none',
 						stroke: color, 'stroke-width': 0.45,
@@ -426,6 +427,8 @@
 					]);
 					g.appendChild(pulse1);
 					g.appendChild(pulse2);
+				} else if (isActive) {
+					g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR + 1.6, fill: color, opacity: 0.18, 'pointer-events': 'none' }));
 				} else if (isHover) {
 					g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR + 1.4, fill: color, opacity: 0.16, 'pointer-events': 'none' }));
 				}

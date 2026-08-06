@@ -50,7 +50,9 @@
 		// Active pin (draggable)
 		var pin = document.createElement('div');
 		pin.className = 'blm-placer-pin';
-		pin.innerHTML = '<span class="blm-placer-pin-dot"></span><span class="blm-placer-pin-ring"></span>';
+		pin.innerHTML = '<svg class="blm-placer-pin-svg" viewBox="0 0 24 34" xmlns="http://www.w3.org/2000/svg">'
+			+ '<path d="M12 33.5 C12 33.5 21.5 19 21.5 10.5 A9.5 9.5 0 1 0 2.5 10.5 C2.5 19 12 33.5 12 33.5 Z" fill="#CA5A35" stroke="#fcf8f2" stroke-width="1.6" stroke-linejoin="round"/>'
+			+ '<circle cx="12" cy="10.5" r="3.4" fill="#fcf8f2"/></svg>';
 		pin.style.left = x + '%';
 		pin.style.top  = y + '%';
 		inner.appendChild(pin);
