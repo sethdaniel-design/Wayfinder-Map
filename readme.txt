@@ -4,7 +4,7 @@ Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        1.7.0
+Stable tag:        1.7.1
 License:           GPL-2.0-or-later
 
 Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
@@ -68,6 +68,9 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 1.7.1 =
+* Deep-link buttons now re-open and re-scroll to their location every time they're clicked — previously a second click did nothing if you were already on that link's hash.
 
 = 1.7.0 =
 * **Deep links:** each Map Point has a shareable link (e.g. your-page/#loc-pin-slug). Opening it (or clicking an in-page link to it) scrolls to the map and opens that location — resetting the category filter if needed so the pin is visible.

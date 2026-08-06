@@ -622,14 +622,30 @@
 		}
 		return bySlug || byId;
 	}
-	function handleHash() {
-		var h = (window.location.hash || '').replace(/^#/, '');
-		if (h.indexOf('loc-') !== 0) return;
-		var pin = pinBySlugOrId(decodeURIComponent(h.slice(4)));
-		if (!pin) return;
+	function activateLoc(key) {
+		var pin = pinBySlugOrId(decodeURIComponent(key));
+		if (!pin) return false;
 		document.querySelectorAll('.bandit-lm-root[data-component="map"]').forEach(function (map) {
 			map.dispatchEvent(new CustomEvent('bandit-lm:setActive', { detail: { id: pin.id } }));
 		});
+		return true;
+	}
+	function handleHash() {
+		var h = (window.location.hash || '').replace(/^#/, '');
+		if (h.indexOf('loc-') === 0) activateLoc(h.slice(4));
+	}
+	// Intercept same-page clicks on #loc-... links so re-clicking the SAME link
+	// re-opens the pin even when the hash is unchanged (no hashchange would fire).
+	function fsNormPath(p) { return (p || '').replace(/\/+$/, ''); }
+	function onDocClick(e) {
+		var a = (e.target && e.target.closest) ? e.target.closest('a[href]') : null;
+		if (!a || !a.hash || a.hash.indexOf('#loc-') !== 0) return;
+		// Only handle links pointing at the current page; let cross-page links navigate.
+		if (a.host !== window.location.host || fsNormPath(a.pathname) !== fsNormPath(window.location.pathname)) return;
+		if (activateLoc(a.hash.slice(5))) {
+			e.preventDefault();
+			if (window.history && window.history.replaceState) { window.history.replaceState(null, '', a.hash); }
+		}
 	}
 
 	// ---------- BOOT ----------
@@ -645,6 +661,7 @@
 	}
 
 	window.addEventListener('hashchange', handleHash);
+	document.addEventListener('click', onDocClick, false);
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 	else boot();
 })();
