@@ -251,9 +251,10 @@
 		// the SVG viewBox matches the image aspect so 1 unit X = 1 unit Y in pixels.
 		function my(y) { return (parseFloat(y) || 0) * vbHeight / 100; }
 		function updateViewBox() {
-			if (imgNaturalW && imgNaturalH && pinSvg) {
+			// vbHeight defines the image-space Y range (X is always 0..100). The pin
+			// SVG's live viewBox is set by syncPinViewBox(), not here.
+			if (imgNaturalW && imgNaturalH) {
 				vbHeight = 100 * (imgNaturalH / imgNaturalW);
-				pinSvg.setAttribute('viewBox', '0 0 100 ' + vbHeight);
 			}
 		}
 		// ----- Fit-to-panel logic (preserve image aspect, no crop) -----
@@ -270,15 +271,31 @@
 			canvas.style.width = w + 'px';
 			canvas.style.height = h + 'px';
 		}
-		// On panel resize, refit and re-scale markers (their size tracks the width).
-		function refit() { fitCanvas(); applyPinScale(); }
+		// On panel resize, refit the image and re-sync the pin layer + marker sizes.
+		function refit() { fitCanvas(); applyTransform(); }
 		var ro = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(refit) : null;
 		if (ro) ro.observe(mapPanel);
 		window.addEventListener('resize', refit);
 
 		// ----- Pan & zoom transform -----
+		// The image canvas is CSS-transformed (raster — blurs when magnified, as
+		// expected). The pin layer is a SEPARATE, un-transformed SVG whose viewBox we
+		// slave to the same pan/zoom, so its vectors stay razor-sharp at any zoom.
+		function syncPinViewBox() {
+			if (!pinSvg || !canvas || !canvas.offsetWidth) return;
+			var panelRect = mapPanel.getBoundingClientRect();
+			var pw = panelRect.width, ph = panelRect.height;
+			if (!pw || !ph) return;
+			var cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+			var k = cw * scale / 100; // panel px per image unit
+			if (!k) return;
+			var A = pw / 2 - 0.5 * cw * scale + tx; // panel-px x of image-space x=0
+			var B = ph / 2 - 0.5 * ch * scale + ty; // panel-px y of image-space y=0
+			pinSvg.setAttribute('viewBox', (-A / k) + ' ' + (-B / k) + ' ' + (pw / k) + ' ' + (ph / k));
+		}
 		function applyTransform() {
 			if (canvas) canvas.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+			syncPinViewBox();
 			zoomCtrls.classList.toggle('is-zoomed', scale > 1.01 || Math.abs(tx) > 1 || Math.abs(ty) > 1);
 			applyPinScale();
 		}
@@ -442,11 +459,13 @@
 			// Connector lines
 			visible().forEach(function (p) {
 				var isActive = actv && p.id === actv.id;
+				// Stroke width is in screen px (non-scaling-stroke on the un-transformed
+				// pin layer), so it stays a constant, crisp hairline at any zoom.
 				pinSvg.appendChild(svg('line', {
 					x1: SETTINGS.hotel_x, y1: my(SETTINGS.hotel_y), x2: p.x, y2: my(p.y),
-					stroke: isActive ? (SETTINGS.hotel_color || '#CA5A35') : 'rgba(28,25,23,0.18)',
-					'stroke-width': isActive ? 0.25 : 0.12,
-					'stroke-dasharray': isActive ? '0' : '0.6 0.5',
+					stroke: isActive ? (SETTINGS.hotel_color || '#CA5A35') : 'rgba(28,25,23,0.28)',
+					'stroke-width': isActive ? 1.6 : 1,
+					'stroke-dasharray': isActive ? '0' : '5 4',
 					'vector-effect': 'non-scaling-stroke',
 					style: 'pointer-events:none'
 				}));
@@ -611,9 +630,13 @@
 					el('span', { className: 'blm-map-fallback-label' }, ['MAP — NO IMAGE SET'])
 				]));
 			}
-			pinSvg = svg('svg', { class: 'blm-pin-layer', viewBox: '0 0 100 100', preserveAspectRatio: 'none' });
-			canvas.appendChild(pinSvg);
 			mapPanel.insertBefore(canvas, mapPanel.firstChild); // behind the absolute overlays
+			// The pin layer lives OUTSIDE the CSS-scaled image canvas, so its vector
+			// pins / lines / labels re-render crisply at any zoom instead of being
+			// rasterised-then-scaled with the (blurry) image. Its viewBox is driven by
+			// syncPinViewBox() to stay locked to the image's pan/zoom.
+			pinSvg = svg('svg', { class: 'blm-pin-layer', viewBox: '0 0 100 100', preserveAspectRatio: 'none' });
+			mapPanel.insertBefore(pinSvg, canvas.nextSibling); // above the image, below the overlays
 			attachPinListeners(pinSvg);
 
 			// Per-map overlays.
