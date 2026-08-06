@@ -170,9 +170,11 @@ function bandit_lm_render_settings_page() {
 					<div class="blm-ap-preview" id="blm-ap-preview" style="<?php echo esc_attr( $ap_preview_style ); ?>">
 						<div class="blm-ap-map">
 							<span class="blm-ap-chip"><?php esc_html_e( 'All', 'bandit-locations-map' ); ?></span>
-							<span class="blm-ap-pin" style="left:24%;top:46%;"></span>
-							<span class="blm-ap-pin" style="left:52%;top:66%;"></span>
-							<span class="blm-ap-pin blm-ap-pin--active" style="left:68%;top:30%;"></span>
+							<span class="blm-ap-pin" style="left:22%;top:52%;"></span>
+							<span class="blm-ap-maplabel" style="left:44%;top:20%;">Castle Rock</span>
+							<span class="blm-ap-pin blm-ap-pin--active" style="left:44%;top:34%;"></span>
+							<span class="blm-ap-hotel" style="left:74%;top:58%;"></span>
+							<span class="blm-ap-maplabel blm-ap-hotellabel" style="left:74%;top:72%;"><?php esc_html_e( 'THE BANDIT', 'bandit-locations-map' ); ?></span>
 						</div>
 						<div class="blm-ap-drawer">
 							<div class="blm-ap-cat"><?php esc_html_e( 'TRAIL', 'bandit-locations-map' ); ?></div>
@@ -183,7 +185,10 @@ function bandit_lm_render_settings_page() {
 								<span><i><?php esc_html_e( 'DRIVE', 'bandit-locations-map' ); ?></i><b>45 min</b></span>
 								<span><i><?php esc_html_e( 'DIST', 'bandit-locations-map' ); ?></i><b>38 mi</b></span>
 							</div>
-							<span class="blm-ap-btn"><?php esc_html_e( 'Plan A Trip', 'bandit-locations-map' ); ?></span>
+							<div class="blm-ap-btnrow">
+								<span class="blm-ap-btn"><?php esc_html_e( 'Plan A Trip', 'bandit-locations-map' ); ?></span>
+								<span class="blm-ap-btn2"><?php esc_html_e( 'Directions ↗', 'bandit-locations-map' ); ?></span>
+							</div>
 						</div>
 						<div class="blm-ap-list">
 							<div class="blm-ap-row blm-ap-row--head"><span>#</span><span><?php esc_html_e( 'PLACE', 'bandit-locations-map' ); ?></span><span><?php esc_html_e( 'TYPE', 'bandit-locations-map' ); ?></span></div>

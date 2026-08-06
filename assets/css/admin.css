@@ -142,8 +142,20 @@
 	--blm-primary: #ca5a35; --blm-link: #ab792b; --blm-map-bg: #241f1b; --blm-black: #1c1917;
 	--blm-canvas: #ebe1cd; --blm-list-bg: #fcf8f2; --blm-list-header: #ebe1cd;
 	--blm-heading: #5a2816; --blm-body: #221e1e; --blm-rule: #d0c4a8; --blm-white: #fcf8f2;
+	--blm-map-text: #ebe1cd; --blm-dir-btn-text: #ebe1cd; --blm-dir-btn-border: rgba(235,225,205,0.3);
 	width: 300px; border: 1px solid #d0c4a8; overflow: hidden;
 	font-family: -apple-system, system-ui, sans-serif;
+}
+.blm-ap-maplabel {
+	position: absolute; transform: translate(-50%,-50%); color: var(--blm-map-text);
+	font-size: 9px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.blm-ap-hotellabel { text-transform: uppercase; letter-spacing: 0.1em; font-size: 8px; }
+.blm-ap-hotel {
+	position: absolute; width: 12px; height: 12px; border-radius: 50%;
+	background: var(--blm-primary); border: 2px solid var(--blm-map-text);
+	transform: translate(-50%,-50%); box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
 }
 .blm-ap-map { position: relative; background: var(--blm-map-bg); height: 148px; }
 .blm-ap-chip {
@@ -165,7 +177,9 @@
 .blm-ap-stats span { border: 1px solid rgba(171,121,43,0.35); padding: 5px 8px; flex: 1; }
 .blm-ap-stats i { display: block; color: var(--blm-link); font-style: normal; font-size: 7px; letter-spacing: 0.14em; font-weight: 700; margin-bottom: 2px; }
 .blm-ap-stats b { color: var(--blm-canvas); font-size: 12px; }
-.blm-ap-btn { display: block; text-align: center; background: var(--blm-primary); color: var(--blm-white); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; padding: 8px; }
+.blm-ap-btnrow { display: flex; gap: 6px; }
+.blm-ap-btn { flex: 1; text-align: center; background: var(--blm-primary); color: var(--blm-white); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; padding: 8px; }
+.blm-ap-btn2 { flex: 1; text-align: center; background: transparent; color: var(--blm-dir-btn-text); border: 1px solid var(--blm-dir-btn-border); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; padding: 7px; }
 .blm-ap-list { background: var(--blm-list-bg); border-top: none; color: var(--blm-body); }
 .blm-ap-row {
 	display: grid; grid-template-columns: 24px 1fr 52px; gap: 6px; padding: 7px 10px;

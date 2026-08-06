@@ -8,13 +8,16 @@
 	--blm-heading:   var(--gcid-heading-color, #5a2816);
 	--blm-body:      var(--gcid-body-color, #221e1e);
 	--blm-link:      var(--gcid-link-color, #ab792b);
-	--blm-canvas:    var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* text on dark areas */
+	--blm-canvas:    var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* drawer / info-panel text */
 	--blm-white:     var(--gcid-x7w9lzfj-ejln-b30l-5v9z-bxck3yebtex5, #fcf8f2); /* text on accent buttons */
 	--blm-black:     #1c1917; /* info panel + stage background */
 	--blm-rule:      #d0c4a8; /* borders & dividers */
 	--blm-map-bg:    #241F1B; /* background behind/around the map image */
 	--blm-list-bg:   var(--gcid-x7w9lzfj-ejln-b30l-5v9z-bxck3yebtex5, #fcf8f2); /* list background */
 	--blm-list-header: var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* list header bar + row dividers */
+	--blm-map-text:  var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* text over the map: pin/hotel labels, chips, HUD, legend */
+	--blm-dir-btn-text:   var(--gcid-79b9hmsq-6joa-hcgx-jah8-9vp1ateeto6o, #ebe1cd); /* Directions (secondary) button text */
+	--blm-dir-btn-border: rgba(235,225,205,0.3); /* Directions (secondary) button border */
 
 	--blm-font-heading:  var(--et_global_heading_font, 'SwimClub-WideSlab'), 'SwimClub WideSlab', serif;
 	--blm-font-body:     var(--et_global_body_font, 'Wigrum-regular'), 'Wigrum', system-ui, sans-serif;
@@ -87,7 +90,7 @@
 .blm-map-fallback-label {
 	font-family: var(--blm-font-mono);
 	font-size: 11px; letter-spacing: 0.12em;
-	color: rgba(235,225,205,0.5);
+	color: var(--blm-map-text); opacity: 0.5;
 }
 
 /* Pin layer SVG covers canvas */
@@ -111,7 +114,7 @@
 	font-family: var(--blm-font-body);
 	font-size: 1.5px;
 	font-weight: 700;
-	fill: var(--blm-canvas);
+	fill: var(--blm-map-text);
 	stroke: rgba(28,25,23,0.6);
 	stroke-width: 0.4;
 	paint-order: stroke;
@@ -120,7 +123,7 @@
 .blm-hotel-label {
 	font-family: var(--blm-font-sub);
 	font-size: 1.7px;
-	fill: var(--blm-canvas);
+	fill: var(--blm-map-text);
 	stroke: rgba(28,25,23,0.7);
 	stroke-width: 0.5;
 	paint-order: stroke;
@@ -130,7 +133,7 @@
 .blm-hotel-sublabel {
 	font-family: var(--blm-font-mono);
 	font-size: 1.2px;
-	fill: rgba(235,225,205,0.6);
+	fill: var(--blm-map-text); opacity: 0.6;
 	stroke: rgba(28,25,23,0.6);
 	stroke-width: 0.3;
 	paint-order: stroke;
@@ -143,7 +146,7 @@
 }
 .blm-chip {
 	background: rgba(28,25,23,0.7);
-	color: rgba(235,225,205,0.78);
+	color: var(--blm-map-text);
 	border: 1px solid rgba(171,121,43,0.4);
 	cursor: pointer;
 	font-family: var(--blm-font-body);
@@ -156,7 +159,7 @@
 	-webkit-backdrop-filter: blur(4px);
 	transition: background 200ms, color 200ms;
 }
-.blm-chip:hover { color: var(--blm-canvas); }
+.blm-chip:hover { color: var(--blm-map-text); }
 .blm-chip.is-active { color: var(--blm-white); }
 
 /* HUD top-right */
@@ -164,7 +167,7 @@
 	position: absolute; top: 16px; right: 16px; z-index: 5;
 	font-family: var(--blm-font-mono);
 	font-size: 10px; letter-spacing: 0.08em;
-	color: rgba(235,225,205,0.7);
+	color: var(--blm-map-text);
 	background: rgba(28,25,23,0.7);
 	padding: 8px 12px;
 	border: 1px solid rgba(171,121,43,0.4);
@@ -187,7 +190,7 @@
 	font-family: var(--blm-font-body);
 	font-size: 10px; font-weight: 700;
 	letter-spacing: 0.14em; text-transform: uppercase;
-	color: rgba(235,225,205,0.75);
+	color: var(--blm-map-text);
 }
 
 /* Compass */
@@ -202,7 +205,7 @@
 .blm-compass-n, .blm-compass-s, .blm-compass-w, .blm-compass-e {
 	position: absolute; font-family: var(--blm-font-sub);
 	font-size: 10px; letter-spacing: 0.04em;
-	color: rgba(235,225,205,0.6);
+	color: var(--blm-map-text);
 }
 .blm-compass-n { top: 4px; left: 50%; transform: translateX(-50%); color: var(--blm-primary); font-size: 11px; }
 .blm-compass-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
@@ -223,7 +226,7 @@
 .blm-zoom-btn {
 	width: 36px; height: 36px;
 	background: rgba(28,25,23,0.8);
-	color: var(--blm-canvas);
+	color: var(--blm-map-text);
 	border: 1px solid rgba(171,121,43,0.4);
 	cursor: pointer;
 	font-family: var(--blm-font-body);
@@ -269,7 +272,7 @@
 .blm-drawer-counter {
 	font-family: var(--blm-font-mono);
 	font-size: 10px;
-	color: rgba(235,225,205,0.5);
+	color: var(--blm-canvas); opacity: 0.5;
 	letter-spacing: 0.04em;
 }
 .blm-drawer-body { padding: 28px 28px 32px; }
@@ -298,12 +301,12 @@
 .blm-drawer-photo-placeholder span {
 	font-family: var(--blm-font-mono);
 	font-size: 10px; letter-spacing: 0.12em;
-	color: rgba(235,225,205,0.45);
+	color: var(--blm-canvas); opacity: 0.45;
 }
 .blm-drawer-blurb {
 	font-family: var(--blm-font-body);
 	font-size: 14px; line-height: 1.8;
-	color: rgba(235,225,205,0.8);
+	color: var(--blm-canvas); opacity: 0.85;
 	margin-bottom: 22px;
 }
 .blm-drawer-blurb p:not(:last-child) { margin: 0 0 12px; }
@@ -358,14 +361,14 @@
 	transition: opacity 200ms;
 }
 .blm-btn-primary { background: var(--blm-primary); color: var(--blm-white); border: none; }
-.blm-btn-secondary { background: transparent; color: var(--blm-canvas); border: 1px solid rgba(235,225,205,0.3); }
+.blm-btn-secondary { background: transparent; color: var(--blm-dir-btn-text); border: 1px solid var(--blm-dir-btn-border); }
 .blm-btn-primary:hover, .blm-btn-secondary:hover { opacity: 0.85; }
 
 .blm-empty {
 	padding: 60px 28px;
 	text-align: center;
 	font-family: var(--blm-font-body);
-	color: rgba(235,225,205,0.5);
+	color: var(--blm-canvas); opacity: 0.5;
 	font-size: 14px;
 }
 

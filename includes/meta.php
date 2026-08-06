@@ -65,18 +65,22 @@ function bandit_lm_get_all_points() {
 function bandit_lm_appearance_colors() {
 	return array(
 		// Accent colors
-		'color_accent'       => array( 'group' => 'Accents',       'var' => '--blm-primary',     'label' => __( 'Accent', 'bandit-locations-map' ),            'desc' => __( 'Buttons, active filter chip, CTA, hotel pin.', 'bandit-locations-map' ) ),
-		'color_detail'       => array( 'group' => 'Accents',       'var' => '--blm-link',        'label' => __( 'Detail accent', 'bandit-locations-map' ),     'desc' => __( 'Stat labels, tags, and list numbers.', 'bandit-locations-map' ) ),
-		// Map & info panel (dark areas)
-		'color_map_bg'       => array( 'group' => 'Map & panel',   'var' => '--blm-map-bg',      'label' => __( 'Map area background', 'bandit-locations-map' ), 'desc' => __( 'Behind and around the map image.', 'bandit-locations-map' ) ),
-		'color_panel_bg'     => array( 'group' => 'Map & panel',   'var' => '--blm-black',       'label' => __( 'Info panel background', 'bandit-locations-map' ), 'desc' => __( 'The side drawer background.', 'bandit-locations-map' ) ),
-		'color_on_dark'      => array( 'group' => 'Map & panel',   'var' => '--blm-canvas',      'label' => __( 'Text on dark areas', 'bandit-locations-map' ),  'desc' => __( 'Drawer text, titles, and pin labels.', 'bandit-locations-map' ) ),
+		'color_accent'        => array( 'group' => 'Accents',       'var' => '--blm-primary',        'label' => __( 'Accent', 'bandit-locations-map' ),            'desc' => __( 'Buttons, active filter chip, CTA, hotel pin.', 'bandit-locations-map' ) ),
+		'color_detail'        => array( 'group' => 'Accents',       'var' => '--blm-link',           'label' => __( 'Detail accent', 'bandit-locations-map' ),     'desc' => __( 'Stat labels, tags, and list numbers.', 'bandit-locations-map' ) ),
+		// Map area
+		'color_map_bg'        => array( 'group' => 'Map area',      'var' => '--blm-map-bg',         'label' => __( 'Map area background', 'bandit-locations-map' ), 'desc' => __( 'Behind and around the map image.', 'bandit-locations-map' ) ),
+		'color_map_text'      => array( 'group' => 'Map area',      'var' => '--blm-map-text',       'label' => __( 'Map label text', 'bandit-locations-map' ),     'desc' => __( 'Pin labels, hotel label, filter chips, legend, HUD.', 'bandit-locations-map' ) ),
+		// Info panel (the drawer)
+		'color_panel_bg'      => array( 'group' => 'Info panel',    'var' => '--blm-black',          'label' => __( 'Info panel background', 'bandit-locations-map' ), 'desc' => __( 'The side drawer background.', 'bandit-locations-map' ) ),
+		'color_on_dark'       => array( 'group' => 'Info panel',    'var' => '--blm-canvas',         'label' => __( 'Drawer text', 'bandit-locations-map' ),        'desc' => __( 'Drawer title, blurb, stats, and counter.', 'bandit-locations-map' ) ),
+		'color_dir_btn_text'  => array( 'group' => 'Info panel',    'var' => '--blm-dir-btn-text',   'label' => __( 'Directions button text', 'bandit-locations-map' ), 'desc' => __( 'The outlined “Directions” button.', 'bandit-locations-map' ) ),
+		'color_dir_btn_border'=> array( 'group' => 'Info panel',    'var' => '--blm-dir-btn-border', 'label' => __( 'Directions button border', 'bandit-locations-map' ), 'desc' => '' ),
 		// Location list (light table)
-		'color_list_bg'      => array( 'group' => 'Location list', 'var' => '--blm-list-bg',     'label' => __( 'List background', 'bandit-locations-map' ),     'desc' => '' ),
-		'color_list_header'  => array( 'group' => 'Location list', 'var' => '--blm-list-header', 'label' => __( 'List header bar', 'bandit-locations-map' ),     'desc' => __( 'Top row background and row dividers.', 'bandit-locations-map' ) ),
-		'color_list_heading' => array( 'group' => 'Location list', 'var' => '--blm-heading',     'label' => __( 'List headings & labels', 'bandit-locations-map' ), 'desc' => __( 'Column headers and category labels.', 'bandit-locations-map' ) ),
-		'color_list_text'    => array( 'group' => 'Location list', 'var' => '--blm-body',        'label' => __( 'List body text', 'bandit-locations-map' ),      'desc' => '' ),
-		'color_border'       => array( 'group' => 'Location list', 'var' => '--blm-rule',        'label' => __( 'Borders', 'bandit-locations-map' ),           'desc' => __( 'List outline and header divider.', 'bandit-locations-map' ) ),
+		'color_list_bg'       => array( 'group' => 'Location list', 'var' => '--blm-list-bg',        'label' => __( 'List background', 'bandit-locations-map' ),     'desc' => '' ),
+		'color_list_header'   => array( 'group' => 'Location list', 'var' => '--blm-list-header',    'label' => __( 'List header bar', 'bandit-locations-map' ),     'desc' => __( 'Top row background and row dividers.', 'bandit-locations-map' ) ),
+		'color_list_heading'  => array( 'group' => 'Location list', 'var' => '--blm-heading',        'label' => __( 'List headings & labels', 'bandit-locations-map' ), 'desc' => __( 'Column headers and category labels.', 'bandit-locations-map' ) ),
+		'color_list_text'     => array( 'group' => 'Location list', 'var' => '--blm-body',           'label' => __( 'List body text', 'bandit-locations-map' ),      'desc' => '' ),
+		'color_border'        => array( 'group' => 'Location list', 'var' => '--blm-rule',           'label' => __( 'Borders', 'bandit-locations-map' ),           'desc' => __( 'List outline and header divider.', 'bandit-locations-map' ) ),
 	);
 }
 
