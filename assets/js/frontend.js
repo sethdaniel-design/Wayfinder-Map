@@ -140,6 +140,42 @@
 		]);
 		mapPanel.appendChild(zoomCtrls);
 
+		// Fullscreen toggle (real Fullscreen API, with a fixed-overlay fallback)
+		var fsIconExpand = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+		var fsIconCompress = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9V4M9 9H4M15 9V4M15 9h5M9 15v5M9 15H4M15 15v5M15 15h5"/></svg>';
+		var fsBtn = el('button', { type: 'button', className: 'blm-zoom-btn blm-fs-btn', 'aria-label': 'Toggle fullscreen', title: 'Fullscreen', onClick: function () { toggleFs(); } });
+		fsBtn.innerHTML = fsIconExpand;
+		zoomCtrls.insertBefore(fsBtn, zoomCtrls.firstChild);
+
+		function fsActive() {
+			var fe = document.fullscreenElement || document.webkitFullscreenElement;
+			return fe === stage || stage.classList.contains('blm-pseudo-fs');
+		}
+		function enterFs() {
+			if (stage.requestFullscreen) {
+				stage.requestFullscreen().catch(function () { stage.classList.add('blm-pseudo-fs'); onFsChange(); });
+			} else if (stage.webkitRequestFullscreen) {
+				stage.webkitRequestFullscreen();
+			} else {
+				stage.classList.add('blm-pseudo-fs'); onFsChange();
+			}
+		}
+		function exitFs() {
+			if (stage.classList.contains('blm-pseudo-fs')) { stage.classList.remove('blm-pseudo-fs'); onFsChange(); return; }
+			if (document.exitFullscreen) { document.exitFullscreen(); }
+			else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+		}
+		function toggleFs() { fsActive() ? exitFs() : enterFs(); }
+		function onFsChange() {
+			var on = fsActive();
+			fsBtn.innerHTML = on ? fsIconCompress : fsIconExpand;
+			fsBtn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Toggle fullscreen');
+			stage.classList.toggle('is-fullscreen', on);
+			setTimeout(fitCanvas, 60);
+		}
+		document.addEventListener('fullscreenchange', onFsChange);
+		document.addEventListener('webkitfullscreenchange', onFsChange);
+
 		// Canvas children
 		var bgImg = null;
 		if (SETTINGS.map_image_url) {
