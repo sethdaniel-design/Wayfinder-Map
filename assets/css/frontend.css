@@ -451,12 +451,12 @@
 
 .bandit-lm-stack > * + * { margin-top: 32px; }
 
-/* Fullscreen — .is-fullscreen is toggled by JS for both the real Fullscreen API
- * and the fixed-overlay fallback (.blm-pseudo-fs). */
-.blm-stage.blm-pseudo-fs { position: fixed; inset: 0; z-index: 99999; width: 100vw; height: 100vh; }
+/* Fullscreen — the stage is relocated into <body> and fixed to the viewport. */
+.blm-stage.blm-pseudo-fs { position: fixed; inset: 0; z-index: 2147483000; width: 100vw; height: 100vh; }
 .blm-stage.is-fullscreen { height: 100vh; }
 .blm-stage.is-fullscreen .blm-map-panel { min-height: 100vh !important; }
 .blm-stage.is-fullscreen .blm-drawer { min-height: 0; overflow-y: auto; }
+body.blm-fs-lock { overflow: hidden !important; }
 @media (max-width: 980px) {
 	.blm-stage.is-fullscreen { height: 100vh; overflow-y: auto; }
 	.blm-stage.is-fullscreen .blm-map-panel { min-height: 70vh !important; }

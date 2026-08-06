@@ -140,41 +140,51 @@
 		]);
 		mapPanel.appendChild(zoomCtrls);
 
-		// Fullscreen toggle (real Fullscreen API, with a fixed-overlay fallback)
+		// Fullscreen toggle — a fixed full-viewport overlay. We deliberately avoid
+		// the native Fullscreen API: inside some embeds it promotes the element to
+		// the top layer and renders black. Instead we relocate the stage into
+		// <body> (carrying its theme variables inline) so position:fixed reliably
+		// fills the viewport even under transformed Divi wrappers.
 		var fsIconExpand = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 		var fsIconCompress = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9V4M9 9H4M15 9V4M15 9h5M9 15v5M9 15H4M15 15v5M15 15h5"/></svg>';
-		var fsBtn = el('button', { type: 'button', className: 'blm-zoom-btn blm-fs-btn', 'aria-label': 'Toggle fullscreen', title: 'Fullscreen', onClick: function () { toggleFs(); } });
+		var fsBtn = el('button', { type: 'button', className: 'blm-zoom-btn blm-fs-btn', 'aria-label': 'Enter fullscreen', title: 'Fullscreen', onClick: function () { toggleFs(); } });
 		fsBtn.innerHTML = fsIconExpand;
 		zoomCtrls.insertBefore(fsBtn, zoomCtrls.firstChild);
 
-		function fsActive() {
-			var fe = document.fullscreenElement || document.webkitFullscreenElement;
-			return fe === stage || stage.classList.contains('blm-pseudo-fs');
+		var FS_VARS = ['--blm-primary', '--blm-secondary', '--blm-heading', '--blm-body', '--blm-link', '--blm-canvas', '--blm-white', '--blm-black', '--blm-rule', '--blm-map-bg', '--blm-list-bg', '--blm-list-header', '--blm-map-text', '--blm-dir-btn-text', '--blm-dir-btn-border', '--blm-font-heading', '--blm-font-body', '--blm-font-mono', '--blm-font-cta', '--blm-font-sub'];
+		var fsPlaceholder = null;
+		function fsActive() { return stage.classList.contains('blm-pseudo-fs'); }
+		function updateFsBtn(on) {
+			fsBtn.innerHTML = on ? fsIconCompress : fsIconExpand;
+			fsBtn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen');
 		}
 		function enterFs() {
-			if (stage.requestFullscreen) {
-				stage.requestFullscreen().catch(function () { stage.classList.add('blm-pseudo-fs'); onFsChange(); });
-			} else if (stage.webkitRequestFullscreen) {
-				stage.webkitRequestFullscreen();
-			} else {
-				stage.classList.add('blm-pseudo-fs'); onFsChange();
-			}
-		}
-		function exitFs() {
-			if (stage.classList.contains('blm-pseudo-fs')) { stage.classList.remove('blm-pseudo-fs'); onFsChange(); return; }
-			if (document.exitFullscreen) { document.exitFullscreen(); }
-			else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
-		}
-		function toggleFs() { fsActive() ? exitFs() : enterFs(); }
-		function onFsChange() {
-			var on = fsActive();
-			fsBtn.innerHTML = on ? fsIconCompress : fsIconExpand;
-			fsBtn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Toggle fullscreen');
-			stage.classList.toggle('is-fullscreen', on);
+			var cs = window.getComputedStyle(root);
+			FS_VARS.forEach(function (v) { stage.style.setProperty(v, cs.getPropertyValue(v)); });
+			fsPlaceholder = document.createComment('blm-fs');
+			stage.parentNode.insertBefore(fsPlaceholder, stage);
+			document.body.appendChild(stage);
+			stage.classList.add('blm-pseudo-fs', 'is-fullscreen');
+			document.body.classList.add('blm-fs-lock');
+			document.addEventListener('keydown', fsEsc);
+			updateFsBtn(true);
 			setTimeout(fitCanvas, 60);
 		}
-		document.addEventListener('fullscreenchange', onFsChange);
-		document.addEventListener('webkitfullscreenchange', onFsChange);
+		function exitFs() {
+			stage.classList.remove('blm-pseudo-fs', 'is-fullscreen');
+			if (fsPlaceholder && fsPlaceholder.parentNode) {
+				fsPlaceholder.parentNode.insertBefore(stage, fsPlaceholder);
+				fsPlaceholder.parentNode.removeChild(fsPlaceholder);
+				fsPlaceholder = null;
+			}
+			FS_VARS.forEach(function (v) { stage.style.removeProperty(v); });
+			document.body.classList.remove('blm-fs-lock');
+			document.removeEventListener('keydown', fsEsc);
+			updateFsBtn(false);
+			setTimeout(fitCanvas, 60);
+		}
+		function fsEsc(e) { if ((e.key === 'Escape' || e.keyCode === 27) && fsActive()) exitFs(); }
+		function toggleFs() { fsActive() ? exitFs() : enterFs(); }
 
 		// Canvas children
 		var bgImg = null;
