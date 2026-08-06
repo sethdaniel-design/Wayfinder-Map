@@ -98,6 +98,31 @@ function bandit_lm_render_details_box( $post ) {
 				</td>
 			</tr>
 		</table>
+		<?php
+		$blm_slug     = $post->post_name;
+		$blm_settings = bandit_lm_get_settings();
+		$blm_base     = isset( $blm_settings['map_page_url'] ) ? preg_replace( '/#.*$/', '', (string) $blm_settings['map_page_url'] ) : '';
+		$blm_frag     = $blm_slug ? '#loc-' . $blm_slug : '';
+		$blm_full     = ( $blm_base && $blm_slug ) ? ( $blm_base . $blm_frag ) : $blm_frag;
+		?>
+		<table class="form-table">
+			<tr>
+				<th><label for="bandit_share_link"><?php esc_html_e( 'Shareable link', 'bandit-locations-map' ); ?></label></th>
+				<td>
+					<?php if ( $blm_slug ) : ?>
+						<input type="text" id="bandit_share_link" class="regular-text" readonly value="<?php echo esc_attr( $blm_full ); ?>" onclick="this.select();" style="max-width:520px;" />
+						<button type="button" class="button" id="bandit_share_copy"><?php esc_html_e( 'Copy', 'bandit-locations-map' ); ?></button>
+						<?php if ( $blm_base ) : ?>
+							<p class="description"><?php esc_html_e( 'Links to this location. Paste it into any button or text link — on this page or elsewhere — to open the map on this pin.', 'bandit-locations-map' ); ?></p>
+						<?php else : ?>
+							<p class="description"><?php esc_html_e( 'Append this to your map page URL, or set the Map page URL under Wayfinder Map → Map Settings → Links for a full copy-paste link.', 'bandit-locations-map' ); ?></p>
+						<?php endif; ?>
+					<?php else : ?>
+						<p class="description"><?php esc_html_e( 'Publish or save this pin first to get its shareable link.', 'bandit-locations-map' ); ?></p>
+					<?php endif; ?>
+				</td>
+			</tr>
+		</table>
 		<p class="description" style="margin-top:8px;">
 		<strong><?php esc_html_e( 'Photo:', 'bandit-locations-map' ); ?></strong>
 		<?php esc_html_e( 'Set the pin photo using the standard "Featured Image" box on the right.', 'bandit-locations-map' ); ?>

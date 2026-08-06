@@ -551,12 +551,17 @@
 		paint();
 		applyTransform();
 
-		// External event hook (used by [bandit_locations_list] rows)
+		// External event hook (used by list rows and deep links)
 		root.addEventListener('bandit-lm:setActive', function (e) {
 			if (e.detail && typeof e.detail.id !== 'undefined') {
 				activeId = e.detail.id;
+				// Ensure the target pin is visible under the current filter.
+				var tp = PINS.filter(function (x) { return x.id === activeId; })[0];
+				if (tp && filter !== 'All' && tp.category !== filter) { filter = 'All'; }
 				paint();
-				root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				if (e.detail.scroll !== false) {
+					root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}
 			}
 		});
 	}
@@ -607,6 +612,26 @@
 		root.appendChild(wrap);
 	}
 
+	// ---------- DEEP LINKS (#loc-<slug|id>) ----------
+	function pinBySlugOrId(key) {
+		if (!key) return null;
+		var byId = null, bySlug = null;
+		for (var i = 0; i < PINS.length; i++) {
+			if (PINS[i].slug === key) bySlug = PINS[i];
+			if (String(PINS[i].id) === String(key)) byId = PINS[i];
+		}
+		return bySlug || byId;
+	}
+	function handleHash() {
+		var h = (window.location.hash || '').replace(/^#/, '');
+		if (h.indexOf('loc-') !== 0) return;
+		var pin = pinBySlugOrId(decodeURIComponent(h.slice(4)));
+		if (!pin) return;
+		document.querySelectorAll('.bandit-lm-root[data-component="map"]').forEach(function (map) {
+			map.dispatchEvent(new CustomEvent('bandit-lm:setActive', { detail: { id: pin.id } }));
+		});
+	}
+
 	// ---------- BOOT ----------
 	function boot() {
 		document.querySelectorAll('.bandit-lm-root').forEach(function (root) {
@@ -615,8 +640,11 @@
 			if (kind === 'map') renderMap(root);
 			else if (kind === 'list') renderList(root);
 		});
+		// Open a deep-linked pin on load, once layout has settled.
+		setTimeout(handleHash, 120);
 	}
 
+	window.addEventListener('hashchange', handleHash);
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 	else boot();
 })();

@@ -219,6 +219,27 @@
 				});
 			});
 		}
+
+		// Shareable-link "Copy" button on the Map Point editor.
+		var shareCopy = document.getElementById('bandit_share_copy');
+		var shareInput = document.getElementById('bandit_share_link');
+		if (shareCopy && shareInput) {
+			shareCopy.addEventListener('click', function () {
+				shareInput.select();
+				var label = shareCopy.textContent;
+				var done = function () {
+					shareCopy.textContent = 'Copied!';
+					setTimeout(function () { shareCopy.textContent = label; }, 1500);
+				};
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(shareInput.value).then(done, function () {
+						try { document.execCommand('copy'); done(); } catch (e) {}
+					});
+				} else {
+					try { document.execCommand('copy'); done(); } catch (e) {}
+				}
+			});
+		}
 	}
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

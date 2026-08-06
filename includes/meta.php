@@ -123,6 +123,7 @@ function bandit_lm_get_settings() {
 		'show_hotel_pin' => 1,
 		'pin_size'       => 100,
 		'show_pulse'     => 1,
+		'map_page_url'   => '',
 	);
 	// Appearance overrides: colors default to '' (inherit), fonts to inherit/blank.
 	foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {

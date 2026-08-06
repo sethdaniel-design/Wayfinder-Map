@@ -38,6 +38,7 @@ function bandit_lm_sanitize_settings( $input ) {
 	$out['show_hotel_pin'] = ! empty( $input['show_hotel_pin'] ) ? 1 : 0;
 	$out['pin_size']       = isset( $input['pin_size'] ) ? max( 40, min( 300, (int) $input['pin_size'] ) ) : 100;
 	$out['show_pulse']     = ! empty( $input['show_pulse'] ) ? 1 : 0;
+	$out['map_page_url']   = isset( $input['map_page_url'] ) ? esc_url_raw( trim( $input['map_page_url'] ) ) : '';
 
 	// Appearance — colors (blank = inherit) and per-role font source/family.
 	foreach ( bandit_lm_appearance_colors() as $ac_key => $ac_info ) {
@@ -141,6 +142,17 @@ function bandit_lm_render_settings_page() {
 				<tr>
 					<th><?php esc_html_e( 'Marker pulse', 'bandit-locations-map' ); ?></th>
 					<td><label><input type="checkbox" name="bandit_lm_settings[show_pulse]" value="1" <?php checked( $s['show_pulse'], 1 ); ?> /> <?php esc_html_e( 'Animate a pulse ring around the selected pin', 'bandit-locations-map' ); ?></label></td>
+				</tr>
+			</table>
+
+			<h2><?php esc_html_e( 'Links', 'bandit-locations-map' ); ?></h2>
+			<table class="form-table">
+				<tr>
+					<th><label for="bandit_map_page_url"><?php esc_html_e( 'Map page URL', 'bandit-locations-map' ); ?></label></th>
+					<td>
+						<input type="url" id="bandit_map_page_url" name="bandit_lm_settings[map_page_url]" value="<?php echo esc_attr( $s['map_page_url'] ); ?>" class="regular-text" placeholder="https://example.com/the-experience/" style="max-width:520px;" />
+						<p class="description"><?php esc_html_e( 'The page where the map is embedded. Used to build the full, copy-paste “shareable link” shown on each Map Point. Deep links look like your-page/#loc-pin-slug and open that location automatically.', 'bandit-locations-map' ); ?></p>
+					</td>
 				</tr>
 			</table>
 
