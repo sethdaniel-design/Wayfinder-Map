@@ -117,6 +117,19 @@ function bandit_lm_render_details_box( $post ) {
 					<p class="description"><?php esc_html_e( 'Optional. Overrides this pin’s marker color. Leave blank to use the category color (falling back to the default).', 'bandit-locations-map' ); ?></p>
 				</td>
 			</tr>
+			<tr>
+				<th><label for="bandit_label_pos"><?php esc_html_e( 'Label position', 'bandit-locations-map' ); ?></label></th>
+				<td>
+					<?php $label_pos = get_post_meta( $post->ID, 'bandit_label_pos', true ); if ( ! $label_pos ) { $label_pos = 'top'; } ?>
+					<select id="bandit_label_pos" name="bandit_label_pos">
+						<option value="top" <?php selected( $label_pos, 'top' ); ?>><?php esc_html_e( 'Above (default)', 'bandit-locations-map' ); ?></option>
+						<option value="bottom" <?php selected( $label_pos, 'bottom' ); ?>><?php esc_html_e( 'Below', 'bandit-locations-map' ); ?></option>
+						<option value="left" <?php selected( $label_pos, 'left' ); ?>><?php esc_html_e( 'Left', 'bandit-locations-map' ); ?></option>
+						<option value="right" <?php selected( $label_pos, 'right' ); ?>><?php esc_html_e( 'Right', 'bandit-locations-map' ); ?></option>
+					</select>
+					<p class="description"><?php esc_html_e( 'Where this pin’s name shows relative to the marker on the map.', 'bandit-locations-map' ); ?></p>
+				</td>
+			</tr>
 		</table>
 		<?php
 		$blm_slug     = $post->post_name;
@@ -196,6 +209,13 @@ function bandit_lm_save_meta( $post_id, $post ) {
 			$raw   = is_scalar( $_POST['bandit_pin_color'] ) ? trim( (string) $_POST['bandit_pin_color'] ) : '';
 			$color = ( $raw === '' ) ? '' : ( sanitize_hex_color( $raw ) ?: '' );
 			update_post_meta( $post_id, 'bandit_pin_color', $color );
+		}
+
+		// Label position (top | bottom | left | right)
+		if ( isset( $_POST['bandit_label_pos'] ) ) {
+			$lp = sanitize_text_field( wp_unslash( $_POST['bandit_label_pos'] ) );
+			if ( ! in_array( $lp, array( 'top', 'bottom', 'left', 'right' ), true ) ) { $lp = 'top'; }
+			update_post_meta( $post_id, 'bandit_label_pos', $lp );
 		}
 	} catch ( \Throwable $e ) {
 		// Catch any fatal/exception during save so the user sees the saved post,

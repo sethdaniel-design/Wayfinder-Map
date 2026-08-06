@@ -169,7 +169,7 @@
 			document.body.classList.add('blm-fs-lock');
 			document.addEventListener('keydown', fsEsc);
 			updateFsBtn(true);
-			setTimeout(fitCanvas, 60);
+			setTimeout(function () { fitCanvas(); applyCover(); }, 60);
 		}
 		function exitFs() {
 			stage.classList.remove('bandit-lm-root', 'blm-pseudo-fs', 'is-fullscreen');
@@ -182,7 +182,7 @@
 			document.body.classList.remove('blm-fs-lock');
 			document.removeEventListener('keydown', fsEsc);
 			updateFsBtn(false);
-			setTimeout(fitCanvas, 60);
+			setTimeout(function () { fitCanvas(); applyCover(); }, 60);
 		}
 		function fsEsc(e) { if ((e.key === 'Escape' || e.keyCode === 27) && fsActive()) exitFs(); }
 		function toggleFs() { fsActive() ? exitFs() : enterFs(); }
@@ -278,6 +278,7 @@
 		function applyTransform() {
 			if (canvas) canvas.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
 			zoomCtrls.classList.toggle('is-zoomed', scale > 1.01 || Math.abs(tx) > 1 || Math.abs(ty) > 1);
+			applyPinScale();
 		}
 		function constrain() {
 			if (!canvas) return;
@@ -305,6 +306,33 @@
 			applyTransform();
 		}
 		function resetView() { tx = 0; ty = 0; scale = 1; applyTransform(); }
+		// Counter-scale each pin/hotel marker so it keeps a constant on-screen size
+		// at any zoom (the map image scales; the markers don't).
+		function applyPinScale() {
+			if (!pinSvg) return;
+			var inv = 1 / scale;
+			var gs = pinSvg.querySelectorAll('.blm-pin, .blm-hotel-pin');
+			for (var i = 0; i < gs.length; i++) {
+				var ax = parseFloat(gs[i].getAttribute('data-ax')) || 0;
+				var ay = parseFloat(gs[i].getAttribute('data-ay')) || 0;
+				gs[i].setAttribute('transform', 'translate(' + ax + ' ' + ay + ') scale(' + inv + ') translate(' + (-ax) + ' ' + (-ay) + ')');
+			}
+		}
+		// Zoom that fills the panel with the image (applied on load + fullscreen change),
+		// so a wide/short image doesn't sit letterboxed. Users can still zoom back out.
+		function coverScale() {
+			if (!canvas) return 1;
+			var pr = mapPanel.getBoundingClientRect();
+			var cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+			if (!cw || !ch || !pr.width || !pr.height) return 1;
+			return Math.max(pr.width / cw, pr.height / ch);
+		}
+		function applyCover() {
+			scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, coverScale()));
+			tx = 0; ty = 0;
+			constrain();
+			applyTransform();
+		}
 
 		// Mouse drag (skip if click started on an interactive control OR on a pin)
 		var dragging = false, lastX = 0, lastY = 0, dragMoved = false;
@@ -405,7 +433,7 @@
 			// Hotel pin
 			if (SETTINGS.show_hotel_pin) {
 				var hx = SETTINGS.hotel_x, hy = my(SETTINGS.hotel_y);
-				var hg = svg('g', { class: 'blm-hotel-pin' });
+				var hg = svg('g', { class: 'blm-hotel-pin', 'data-ax': hx, 'data-ay': hy });
 				hg.appendChild(svg('circle', { cx: hx, cy: hy, r: 2.6, fill: 'none', stroke: SETTINGS.hotel_color, 'stroke-width': 0.2, opacity: 0.5 }));
 				hg.appendChild(svg('circle', { cx: hx, cy: hy, r: 1.8, fill: SETTINGS.hotel_color }));
 				hg.appendChild(svg('circle', { cx: hx, cy: hy, r: 0.6, fill: '#FCF8F2' }));
@@ -427,6 +455,8 @@
 				var g = svg('g', {
 					class: 'blm-pin' + (isActive ? ' is-active' : ''),
 					'data-pin-id': p.id,
+					'data-ax': px,
+					'data-ay': py,
 					style: 'cursor:pointer'
 				});
 				// Transparent hit area over the whole marker
@@ -464,10 +494,16 @@
 				g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR * 0.4, fill: '#FCF8F2', 'pointer-events': 'none' }));
 
 				if (isActive || isHover) {
-					g.appendChild(svg('text', { x: px, y: (headCy - headR - 1.2), 'text-anchor': 'middle', class: 'blm-pin-label', 'pointer-events': 'none' }, [p.name.split('·')[0].trim()]));
+					var lp = p.label_pos || 'top';
+					var lx = px, ly = headCy - headR - 1.2, lAnchor = 'middle';
+					if (lp === 'bottom') { ly = py + 1.9; }
+					else if (lp === 'left') { lx = px - (headR + 1); ly = headCy + 0.6; lAnchor = 'end'; }
+					else if (lp === 'right') { lx = px + (headR + 1); ly = headCy + 0.6; lAnchor = 'start'; }
+					g.appendChild(svg('text', { x: lx, y: ly, 'text-anchor': lAnchor, class: 'blm-pin-label', 'pointer-events': 'none' }, [p.name.split('·')[0].trim()]));
 				}
 				pinSvg.appendChild(g);
 			});
+			applyPinScale();
 
 			// Drawer
 			drawer.innerHTML = '';
@@ -628,7 +664,7 @@
 				} else {
 					bgImg.addEventListener('load', function () {
 						imgNaturalW = bgImg.naturalWidth; imgNaturalH = bgImg.naturalHeight;
-						updateViewBox(); fitCanvas(); paint();
+						updateViewBox(); fitCanvas(); applyCover(); paint();
 					});
 				}
 			}
@@ -637,7 +673,7 @@
 			applyTransform();
 			fitCanvas();
 			paint();
-			setTimeout(fitCanvas, 0);
+			setTimeout(function () { fitCanvas(); applyCover(); }, 0);
 		}
 
 		loadMap(0);

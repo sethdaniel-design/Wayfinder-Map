@@ -45,6 +45,7 @@ function bandit_lm_get_all_points() {
 			'category_slug'   => $cat ? $cat->slug : '',
 			'category_color'  => $cat_color,
 			'pin_color'       => (string) get_post_meta( $p->ID, 'bandit_pin_color', true ),
+			'label_pos'       => (string) get_post_meta( $p->ID, 'bandit_label_pos', true ),
 			'x'               => $x_raw === '' ? 50.0 : (float) $x_raw,
 			'y'               => $y_raw === '' ? 50.0 : (float) $y_raw,
 			'drive'           => (string) get_post_meta( $p->ID, 'bandit_drive', true ),
