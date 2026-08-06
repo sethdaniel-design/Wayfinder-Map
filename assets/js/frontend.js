@@ -164,14 +164,16 @@
 			fsPlaceholder = document.createComment('blm-fs');
 			stage.parentNode.insertBefore(fsPlaceholder, stage);
 			document.body.appendChild(stage);
-			stage.classList.add('blm-pseudo-fs', 'is-fullscreen');
+			// Carry the root class so root-scoped rules (pin pointer-events,
+			// box-sizing) still apply now that the stage is outside .bandit-lm-root.
+			stage.classList.add('bandit-lm-root', 'blm-pseudo-fs', 'is-fullscreen');
 			document.body.classList.add('blm-fs-lock');
 			document.addEventListener('keydown', fsEsc);
 			updateFsBtn(true);
 			setTimeout(fitCanvas, 60);
 		}
 		function exitFs() {
-			stage.classList.remove('blm-pseudo-fs', 'is-fullscreen');
+			stage.classList.remove('bandit-lm-root', 'blm-pseudo-fs', 'is-fullscreen');
 			if (fsPlaceholder && fsPlaceholder.parentNode) {
 				fsPlaceholder.parentNode.insertBefore(stage, fsPlaceholder);
 				fsPlaceholder.parentNode.removeChild(fsPlaceholder);

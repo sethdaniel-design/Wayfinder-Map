@@ -4,7 +4,7 @@ Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        1.6.1
+Stable tag:        1.6.2
 License:           GPL-2.0-or-later
 
 Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
@@ -68,6 +68,9 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 1.6.2 =
+* Fixed map pins not being clickable while in fullscreen (they now respond to hover and click as expected).
 
 = 1.6.1 =
 * Fixed the fullscreen toggle showing a black screen in some embeds. It no longer uses the native Fullscreen API; instead the map expands to a reliable full-viewport overlay (works even inside transformed page builders), with Esc to close.
