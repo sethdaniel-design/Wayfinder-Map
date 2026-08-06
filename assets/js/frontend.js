@@ -54,6 +54,20 @@
 		var c = findCat(name);
 		return c ? c.color : '#5A2816';
 	}
+	// Effective marker colour: per-pin override -> category colour -> default.
+	function effColor(p) {
+		if (p && p.pin_color) return p.pin_color;
+		return (p && p.category_color) ? p.category_color : catColor(p ? p.category : '');
+	}
+	// Teardrop map-pin path with its tip at (cx, tipY) and total height h.
+	function pinPath(cx, tipY, h) {
+		var r = h * 0.32;
+		var cy = tipY - h + r; // head centre
+		return 'M' + cx + ',' + tipY +
+			'C' + (cx - r * 0.75) + ',' + (tipY - h * 0.5) + ' ' + (cx - r) + ',' + (cy + r * 0.55) + ' ' + (cx - r) + ',' + cy +
+			'A' + r + ',' + r + ' 0 1,1 ' + (cx + r) + ',' + cy +
+			'C' + (cx + r) + ',' + (cy + r * 0.55) + ' ' + (cx + r * 0.75) + ',' + (tipY - h * 0.5) + ' ' + cx + ',' + tipY + 'Z';
+	}
 
 	// ---------- MAP COMPONENT ----------
 	function renderMap(root) {
@@ -374,22 +388,26 @@
 				pinSvg.appendChild(hg);
 			}
 
-			// POI pins
+			// POI pins (teardrop markers — tip sits on the exact location)
 			visible().forEach(function (p) {
 				var isActive = actv && p.id === actv.id;
 				var isHover = hoverId === p.id;
-				var color = p.category_color || catColor(p.category);
+				var color = effColor(p);
 				var px = p.x, py = my(p.y);
+				var h = isActive ? 5.8 : (isHover ? 5.2 : 4.5); // marker height (tip -> top)
+				var headR = h * 0.32;
+				var headCy = py - h + headR;                    // centre of the round head
 				var g = svg('g', {
 					class: 'blm-pin' + (isActive ? ' is-active' : ''),
 					'data-pin-id': p.id,
 					style: 'cursor:pointer'
 				});
-				g.appendChild(svg('circle', { cx: px, cy: py, r: 4.5, fill: 'transparent' }));
+				// Transparent hit area over the whole marker
+				g.appendChild(svg('circle', { cx: px, cy: headCy, r: h * 0.72, fill: 'transparent' }));
 
 				if (isActive) {
 					var pulse1 = svg('circle', {
-						cx: px, cy: py, r: 2, fill: 'none',
+						cx: px, cy: headCy, r: 2, fill: 'none',
 						stroke: color, 'stroke-width': 0.45,
 						opacity: 0.9, 'pointer-events': 'none'
 					}, [
@@ -398,7 +416,7 @@
 						svg('animate', { attributeName: 'stroke-width', values: '0.45;0.05', dur: '1.6s', repeatCount: 'indefinite' })
 					]);
 					var pulse2 = svg('circle', {
-						cx: px, cy: py, r: 2, fill: 'none',
+						cx: px, cy: headCy, r: 2, fill: 'none',
 						stroke: color, 'stroke-width': 0.45,
 						opacity: 0.9, 'pointer-events': 'none'
 					}, [
@@ -408,15 +426,16 @@
 					]);
 					g.appendChild(pulse1);
 					g.appendChild(pulse2);
-					g.appendChild(svg('circle', { cx: px, cy: py, r: 2.8, fill: color, opacity: 0.18, 'pointer-events': 'none' }));
 				} else if (isHover) {
-					g.appendChild(svg('circle', { cx: px, cy: py, r: 3.4, fill: color, opacity: 0.16, 'pointer-events': 'none' }));
+					g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR + 1.4, fill: color, opacity: 0.16, 'pointer-events': 'none' }));
 				}
 
-				g.appendChild(svg('circle', { cx: px, cy: py, r: isActive ? 1.6 : 1.1, fill: color, stroke: '#1C1917', 'stroke-width': 0.14 }));
+				// Teardrop body + light knockout hole
+				g.appendChild(svg('path', { d: pinPath(px, py, h), fill: color, stroke: '#1C1917', 'stroke-width': 0.14, 'stroke-linejoin': 'round' }));
+				g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR * 0.4, fill: '#FCF8F2', 'pointer-events': 'none' }));
 
 				if (isActive || isHover) {
-					g.appendChild(svg('text', { x: px, y: py - 2.6, 'text-anchor': 'middle', class: 'blm-pin-label', 'pointer-events': 'none' }, [p.name.split('·')[0].trim()]));
+					g.appendChild(svg('text', { x: px, y: (headCy - headR - 1.2), 'text-anchor': 'middle', class: 'blm-pin-label', 'pointer-events': 'none' }, [p.name.split('·')[0].trim()]));
 				}
 				pinSvg.appendChild(g);
 			});
@@ -424,7 +443,7 @@
 			// Drawer
 			drawer.innerHTML = '';
 			if (actv) {
-				var color = actv.category_color || catColor(actv.category);
+				var color = effColor(actv);
 				drawer.appendChild(el('div', { className: 'blm-drawer-head' }, [
 					el('span', { className: 'blm-drawer-cat', style: { color: color } }, [actv.category || '—']),
 					el('span', { className: 'blm-drawer-counter' }, [

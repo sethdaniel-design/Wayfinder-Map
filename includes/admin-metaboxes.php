@@ -88,7 +88,17 @@ function bandit_lm_render_details_box( $post ) {
 		</tr>
 		<?php endforeach; ?>
 	</table>
-	<p class="description" style="margin-top:8px;">
+	<table class="form-table">
+			<tr>
+				<th><label for="bandit_pin_color"><?php esc_html_e( 'Pin Color (override)', 'bandit-locations-map' ); ?></label></th>
+				<td>
+					<?php $pin_color = get_post_meta( $post->ID, 'bandit_pin_color', true ); ?>
+					<input type="text" id="bandit_pin_color" name="bandit_pin_color" class="blm-color-field" value="<?php echo esc_attr( $pin_color ); ?>" placeholder="<?php esc_attr_e( 'Category color', 'bandit-locations-map' ); ?>" />
+					<p class="description"><?php esc_html_e( 'Optional. Overrides this pin’s marker color. Leave blank to use the category color (falling back to the default).', 'bandit-locations-map' ); ?></p>
+				</td>
+			</tr>
+		</table>
+		<p class="description" style="margin-top:8px;">
 		<strong><?php esc_html_e( 'Photo:', 'bandit-locations-map' ); ?></strong>
 		<?php esc_html_e( 'Set the pin photo using the standard "Featured Image" box on the right.', 'bandit-locations-map' ); ?>
 		<br>
@@ -132,6 +142,13 @@ function bandit_lm_save_meta( $post_id, $post ) {
 				$v = in_array( $k, $url_fields, true ) ? esc_url_raw( $raw ) : sanitize_text_field( $raw );
 				update_post_meta( $post_id, $k, $v );
 			}
+		}
+
+		// Per-pin color override (hex, blank = use category color)
+		if ( isset( $_POST['bandit_pin_color'] ) ) {
+			$raw   = is_scalar( $_POST['bandit_pin_color'] ) ? trim( (string) $_POST['bandit_pin_color'] ) : '';
+			$color = ( $raw === '' ) ? '' : ( sanitize_hex_color( $raw ) ?: '' );
+			update_post_meta( $post_id, 'bandit_pin_color', $color );
 		}
 	} catch ( \Throwable $e ) {
 		// Catch any fatal/exception during save so the user sees the saved post,
