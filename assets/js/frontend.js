@@ -121,7 +121,7 @@
 		var switcher = null;
 		if (mapList.length > 1) {
 			switcher = el('div', { className: 'blm-switcher' });
-			mapPanel.appendChild(switcher);
+			stage.insertBefore(switcher, mapPanel); // overlay on desktop, bar above map on mobile
 		}
 
 		var hudTR = el('div', { className: 'blm-hud-tr' });
@@ -193,7 +193,7 @@
 		var eyeBtn = el('button', {
 			type: 'button', className: 'blm-zoom-btn blm-eye-btn', 'aria-label': 'Hide overlays', title: 'Hide overlays',
 			onClick: function () {
-				var hidden = mapPanel.classList.toggle('blm-ui-hidden');
+				var hidden = stage.classList.toggle('blm-ui-hidden');
 				eyeBtn.innerHTML = hidden ? eyeIconClosed : eyeIconOpen;
 				eyeBtn.setAttribute('aria-label', hidden ? 'Show overlays' : 'Hide overlays');
 			}
@@ -270,9 +270,11 @@
 			canvas.style.width = w + 'px';
 			canvas.style.height = h + 'px';
 		}
-		var ro = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(fitCanvas) : null;
+		// On panel resize, refit and re-scale markers (their size tracks the width).
+		function refit() { fitCanvas(); applyPinScale(); }
+		var ro = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(refit) : null;
 		if (ro) ro.observe(mapPanel);
-		window.addEventListener('resize', fitCanvas);
+		window.addEventListener('resize', refit);
 
 		// ----- Pan & zoom transform -----
 		function applyTransform() {
@@ -309,13 +311,19 @@
 		// Counter-scale each pin/hotel marker so it keeps a constant on-screen size
 		// at any zoom (the map image scales; the markers don't).
 		function applyPinScale() {
-			if (!pinSvg) return;
-			var inv = 1 / scale;
+			if (!pinSvg || !canvas || !canvas.offsetWidth) return;
+			var unitPx = canvas.offsetWidth / 100;             // screen px per image unit (at scale 1)
+			var pinScale = (parseFloat(SETTINGS.pin_size) || 100) / 100;
+			// Markers are drawn at fixed image units (inactive base = 4.5). Scale each so
+			// an inactive marker reads ~30px on screen at any zoom or panel width; active
+			// / hover markers keep their drawn ratio. Uses live unitPx + scale, so it's
+			// correct regardless of when the markers were last painted.
+			var ts = (30 * pinScale) / (4.5 * unitPx * scale);
 			var gs = pinSvg.querySelectorAll('.blm-pin, .blm-hotel-pin');
 			for (var i = 0; i < gs.length; i++) {
 				var ax = parseFloat(gs[i].getAttribute('data-ax')) || 0;
 				var ay = parseFloat(gs[i].getAttribute('data-ay')) || 0;
-				gs[i].setAttribute('transform', 'translate(' + ax + ' ' + ay + ') scale(' + inv + ') translate(' + (-ax) + ' ' + (-ay) + ')');
+				gs[i].setAttribute('transform', 'translate(' + ax + ' ' + ay + ') scale(' + ts + ') translate(' + (-ax) + ' ' + (-ay) + ')');
 			}
 		}
 		// Zoom that fills the panel with the image (applied on load + fullscreen change),
@@ -336,7 +344,12 @@
 			ty = -((p.y / 100) - 0.5) * ch * scale;
 		}
 		function applyCover() {
-			scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, coverScale()));
+			// On narrow (mobile) panels a wide image would cover-zoom hard and look
+			// upscaled; cap it so it stays reasonably crisp. Based on the actual panel
+			// width so it's robust to viewport-timing quirks.
+			var narrow = mapPanel.getBoundingClientRect().width <= 600;
+			var cap = narrow ? 2 : MAX_SCALE;
+			scale = Math.max(MIN_SCALE, Math.min(cap, coverScale()));
 			centerOnActive();
 			constrain();
 			applyTransform();
@@ -451,13 +464,12 @@
 			}
 
 			// POI pins (teardrop markers — tip sits on the exact location)
-			var pinScale = (parseFloat(SETTINGS.pin_size) || 100) / 100;
 			visible().forEach(function (p) {
 				var isActive = actv && p.id === actv.id;
 				var isHover = hoverId === p.id;
 				var color = effColor(p);
 				var px = p.x, py = my(p.y);
-				var h = (isActive ? 5.8 : (isHover ? 5.2 : 4.5)) * pinScale; // marker height (tip -> top)
+				var h = isActive ? 5.8 : (isHover ? 5.2 : 4.5); // marker height in image units (screen size handled by applyPinScale)
 				var headR = h * 0.32;
 				var headCy = py - h + headR;                    // centre of the round head
 				var g = svg('g', {
@@ -471,26 +483,16 @@
 				g.appendChild(svg('circle', { cx: px, cy: headCy, r: h * 0.72, fill: 'transparent' }));
 
 				if (isActive && SETTINGS.show_pulse) {
-					var pulse1 = svg('circle', {
-						cx: px, cy: headCy, r: 2, fill: 'none',
-						stroke: color, 'stroke-width': 0.45,
-						opacity: 0.9, 'pointer-events': 'none'
-					}, [
-						svg('animate', { attributeName: 'r',       values: '1.6;5.5',  dur: '1.6s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '0.16 1 0.3 1' }),
-						svg('animate', { attributeName: 'opacity', values: '0.9;0',     dur: '1.6s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '0.16 1 0.3 1' }),
-						svg('animate', { attributeName: 'stroke-width', values: '0.45;0.05', dur: '1.6s', repeatCount: 'indefinite' })
-					]);
-					var pulse2 = svg('circle', {
-						cx: px, cy: headCy, r: 2, fill: 'none',
-						stroke: color, 'stroke-width': 0.45,
-						opacity: 0.9, 'pointer-events': 'none'
-					}, [
-						svg('animate', { attributeName: 'r',       values: '1.6;5.5',  dur: '1.6s', begin: '0.8s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '0.16 1 0.3 1' }),
-						svg('animate', { attributeName: 'opacity', values: '0.9;0',     dur: '1.6s', begin: '0.8s', repeatCount: 'indefinite', calcMode: 'spline', keySplines: '0.16 1 0.3 1' }),
-						svg('animate', { attributeName: 'stroke-width', values: '0.45;0.05', dur: '1.6s', begin: '0.8s', repeatCount: 'indefinite' })
-					]);
-					g.appendChild(pulse1);
-					g.appendChild(pulse2);
+					var pr0 = headR * 1.1, pr1 = headR * 3.8, sw0 = headR * 0.3, sw1 = headR * 0.03;
+					var mkPulse = function (begin) {
+						return svg('circle', { cx: px, cy: headCy, r: pr0, fill: 'none', stroke: color, 'stroke-width': sw0, opacity: 0.9, 'pointer-events': 'none' }, [
+							svg('animate', { attributeName: 'r', values: pr0 + ';' + pr1, dur: '1.6s', begin: begin, repeatCount: 'indefinite', calcMode: 'spline', keySplines: '0.16 1 0.3 1' }),
+							svg('animate', { attributeName: 'opacity', values: '0.9;0', dur: '1.6s', begin: begin, repeatCount: 'indefinite', calcMode: 'spline', keySplines: '0.16 1 0.3 1' }),
+							svg('animate', { attributeName: 'stroke-width', values: sw0 + ';' + sw1, dur: '1.6s', begin: begin, repeatCount: 'indefinite' })
+						]);
+					};
+					g.appendChild(mkPulse('0s'));
+					g.appendChild(mkPulse('0.8s'));
 				} else if (isActive) {
 					g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR + 1.6, fill: color, opacity: 0.18, 'pointer-events': 'none' }));
 				} else if (isHover) {
@@ -653,7 +655,7 @@
 					fWrap.appendChild(menu);
 					legend.appendChild(fWrap);
 				}
-				mapPanel.appendChild(legend);
+				stage.insertBefore(legend, drawer); // overlay on desktop, bar below map on mobile
 			}
 			if (SETTINGS.show_compass) {
 				compassEl = el('div', { className: 'blm-compass' }, [
