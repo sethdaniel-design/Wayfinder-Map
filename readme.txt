@@ -4,7 +4,7 @@ Tags:              map, locations, interactive map, points of interest, divi
 Requires at least: 6.0
 Tested up to:      6.5
 Requires PHP:      7.4
-Stable tag:        2.3.0
+Stable tag:        2.3.1
 License:           GPL-2.0-or-later
 
 Custom interactive locations map. Adds a Custom Post Type for map pins, a visual pin-placement tool, and three shortcodes for embedding the map anywhere — Divi 5 friendly.
@@ -69,6 +69,11 @@ Yes. Drop the shortcode into any Text or Code module in the Divi Builder. The pl
 No. The plugin uses native WordPress meta and custom metaboxes — no dependencies.
 
 == Changelog ==
+
+= 2.3.1 =
+* Larger, more readable location + hotel labels (they were too small relative to the markers, on desktop and mobile).
+* Bigger markers on mobile for easier tapping/reading.
+* Fixed the mobile switcher and Filter bars being hard to read — they now use a fixed dark background so the text stays legible regardless of your chosen panel color.
 
 = 2.3.0 =
 * Mobile: the map switcher moves into a bar **above** the map and the category filter into a bar **below** it, so the map itself stays uncluttered.

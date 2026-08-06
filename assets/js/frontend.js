@@ -315,10 +315,11 @@
 			var unitPx = canvas.offsetWidth / 100;             // screen px per image unit (at scale 1)
 			var pinScale = (parseFloat(SETTINGS.pin_size) || 100) / 100;
 			// Markers are drawn at fixed image units (inactive base = 4.5). Scale each so
-			// an inactive marker reads ~30px on screen at any zoom or panel width; active
-			// / hover markers keep their drawn ratio. Uses live unitPx + scale, so it's
-			// correct regardless of when the markers were last painted.
-			var ts = (30 * pinScale) / (4.5 * unitPx * scale);
+			// an inactive marker reads a fixed px size at any zoom or panel width; active
+			// / hover markers keep their drawn ratio. A bit larger on narrow (mobile)
+			// panels so pins + labels stay legible. Uses live unitPx + scale.
+			var narrow = mapPanel.getBoundingClientRect().width <= 600;
+			var ts = ((narrow ? 36 : 30) * pinScale) / (4.5 * unitPx * scale);
 			var gs = pinSvg.querySelectorAll('.blm-pin, .blm-hotel-pin');
 			for (var i = 0; i < gs.length; i++) {
 				var ax = parseFloat(gs[i].getAttribute('data-ax')) || 0;

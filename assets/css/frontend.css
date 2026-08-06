@@ -113,7 +113,7 @@
 .blm-pin { transition: opacity 200ms; }
 .blm-pin-label {
 	font-family: var(--blm-font-body);
-	font-size: 1.5px;
+	font-size: 2px;
 	font-weight: 700;
 	fill: var(--blm-map-text);
 	stroke: rgba(28,25,23,0.6);
@@ -123,7 +123,7 @@
 }
 .blm-hotel-label {
 	font-family: var(--blm-font-sub);
-	font-size: 1.7px;
+	font-size: 2px;
 	fill: var(--blm-map-text);
 	stroke: rgba(28,25,23,0.7);
 	stroke-width: 0.5;
@@ -133,7 +133,7 @@
 }
 .blm-hotel-sublabel {
 	font-family: var(--blm-font-mono);
-	font-size: 1.2px;
+	font-size: 1.45px;
 	fill: var(--blm-map-text); opacity: 0.6;
 	stroke: rgba(28,25,23,0.6);
 	stroke-width: 0.3;
@@ -533,13 +533,13 @@ body.blm-fs-lock { overflow: hidden !important; }
 		width: 100%; max-width: none; border: none;
 		border-bottom: 1px solid rgba(171,121,43,0.35);
 		justify-content: center; overflow-x: auto; -webkit-overflow-scrolling: touch;
-		background: var(--blm-black); padding: 4px;
+		background: rgba(28,25,23,0.92); padding: 4px;
 	}
 	.blm-switch-btn { flex: 0 0 auto; }
 	.blm-legend {
 		position: static; bottom: auto; left: auto;
 		width: 100%; min-width: 0; border: none;
-		border-top: 1px solid rgba(171,121,43,0.35); background: var(--blm-black);
+		border-top: 1px solid rgba(171,121,43,0.35); background: rgba(28,25,23,0.92);
 		padding: 0;
 	}
 	.blm-legend-row { display: none; } /* the colour key lives in the Filter dropdown on mobile */
