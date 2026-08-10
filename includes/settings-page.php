@@ -32,6 +32,7 @@ function bandit_lm_sanitize_settings( $input ) {
 
 	$out['pin_size']     = isset( $input['pin_size'] ) ? max( 40, min( 300, (int) $input['pin_size'] ) ) : 100;
 	$out['show_pulse']   = ! empty( $input['show_pulse'] ) ? 1 : 0;
+	$out['show_all_labels'] = ! empty( $input['show_all_labels'] ) ? 1 : 0;
 	$out['map_page_url'] = isset( $input['map_page_url'] ) ? esc_url_raw( trim( $input['map_page_url'] ) ) : '';
 
 	// Appearance — colors (blank = inherit) and per-role font source/family.
@@ -77,6 +78,13 @@ function bandit_lm_render_settings_page() {
 				<tr>
 					<th><?php esc_html_e( 'Marker pulse', 'bandit-locations-map' ); ?></th>
 					<td><label><input type="checkbox" name="bandit_lm_settings[show_pulse]" value="1" <?php checked( $s['show_pulse'], 1 ); ?> /> <?php esc_html_e( 'Animate a pulse ring around the selected pin', 'bandit-locations-map' ); ?></label></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Pin labels', 'bandit-locations-map' ); ?></th>
+					<td>
+						<label><input type="checkbox" name="bandit_lm_settings[show_all_labels]" value="1" <?php checked( $s['show_all_labels'], 1 ); ?> /> <?php esc_html_e( 'Always show the name label on every pin', 'bandit-locations-map' ); ?></label>
+						<p class="description"><?php esc_html_e( 'When off, a pin’s label only appears on hover or when selected.', 'bandit-locations-map' ); ?></p>
+					</td>
 				</tr>
 			</table>
 

@@ -545,7 +545,7 @@
 				g.appendChild(svg('path', { d: pinPath(px, py, h), fill: color, stroke: '#1C1917', 'stroke-width': 0.14, 'stroke-linejoin': 'round' }));
 				g.appendChild(svg('circle', { cx: px, cy: headCy, r: headR * 0.4, fill: '#FCF8F2', 'pointer-events': 'none' }));
 
-				if (isActive || isHover) {
+				if (isActive || isHover || SETTINGS.show_all_labels) {
 					var lp = p.label_pos || 'top';
 					var lx = px, ly = headCy - headR - 1.2, lAnchor = 'middle';
 					if (lp === 'bottom') { ly = py + 1.9; }
